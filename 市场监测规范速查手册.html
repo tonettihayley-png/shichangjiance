@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>市场监测规范速查手册</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: #f0f4ff;
+    color: #333;
+    min-height: 100vh;
+  }
+
+  /* ===== 顶部 Hero ===== */
+  .hero {
+    background: linear-gradient(135deg, #1a6fc4 0%, #0fa3b1 100%);
+    padding: 28px 20px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -30px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .hero h1 {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .hero p {
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    position: relative;
+  }
+
+  /* ===== 搜索框 ===== */
+  .search-wrap {
+    margin: -28px 16px 0;
+    position: relative;
+    z-index: 10;
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 20px rgba(26,111,196,0.15);
+    gap: 10px;
+  }
+  .search-icon { font-size: 18px; color: #1a6fc4; flex-shrink: 0; }
+  .search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: #333;
+    background: transparent;
+  }
+  .search-box input::placeholder { color: #aaa; }
+  .search-clear {
+    font-size: 18px;
+    color: #ccc;
+    cursor: pointer;
+    display: none;
+  }
+
+  /* ===== 搜索结果 ===== */
+  .search-results {
+    display: none;
+    margin: 12px 16px 0;
+  }
+  .search-results.show { display: block; }
+  .search-result-title {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+  .search-hit {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-left: 4px solid #1a6fc4;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .search-hit .hit-tag {
+    font-size: 11px;
+    background: #e8f1ff;
+    color: #1a6fc4;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .search-hit .hit-q { font-size: 14px; font-weight: 600; color: #222; margin-bottom: 6px; }
+  .search-hit .hit-a { font-size: 13px; color: #555; line-height: 1.6; }
+  .search-hit .hit-a mark { background: #fff3cd; color: #b8860b; padding: 0 2px; border-radius: 3px; }
+  .no-result {
+    text-align: center;
+    padding: 30px;
+    color: #aaa;
+    font-size: 14px;
+  }
+  .no-result .emoji { font-size: 36px; display: block; margin-bottom: 8px; }
+
+  /* ===== Tab 导航 ===== */
+  .tabs-wrap {
+    margin: 20px 16px 0;
+  }
+  .tabs {
+    display: flex;
+    background: #fff;
+    border-radius: 12px;
+    padding: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    gap: 4px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 9px;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.25s;
+    user-select: none;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #1a6fc4, #0fa3b1);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(26,111,196,0.3);
+  }
+  .tab .tab-icon { display: block; font-size: 16px; margin-bottom: 2px; }
+
+  /* ===== 内容区 ===== */
+  .content { padding: 16px 16px 80px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ===== 分类速查卡片 ===== */
+  .category-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .cat-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+  }
+  .cat-card:active { transform: scale(0.97); }
+  .cat-card.selected { border-color: #1a6fc4; background: #f0f6ff; }
+  .cat-card .cat-icon { font-size: 28px; margin-bottom: 6px; display: block; }
+  .cat-card .cat-name { font-size: 13px; font-weight: 600; color: #333; }
+  .cat-card .cat-count { font-size: 11px; color: #aaa; margin-top: 2px; }
+
+  .compare-list { display: none; }
+  .compare-list.show { display: block; }
+  .compare-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a6fc4;
+    padding: 12px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .compare-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+  .compare-card .aspect {
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .change-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .change-badge.major { background: #fee2e2; color: #dc2626; }
+  .change-badge.new { background: #dcfce7; color: #16a34a; }
+  .change-badge.adjust { background: #fef9c3; color: #ca8a04; }
+
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .compare-old, .compare-new {
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .compare-old {
+    background: #fff5f5;
+    border: 1px solid #fecaca;
+  }
+  .compare-new {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+  }
+  .label-old, .label-new {
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .label-old { color: #ef4444; }
+  .label-new { color: #16a34a; }
+  .compare-note {
+    font-size: 12px;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 8px 10px;
+    border-left: 3px solid #e5e7eb;
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  .compare-note-new {
+    font-size: 12px;
+    color: #374151;
+    background: #f0fdf4;
+    border-radius: 8px;
+    padding: 10px;
+    border-left: 3px solid #16a34a;
+  }
+
+  /* ===== FAQ ===== */
+  .faq-item {
+    background: #fff;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+  .faq-q {
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+    gap: 10px;
+  }
+  .faq-q .q-text { flex: 1; display: flex; align-items: flex-start; gap: 8px; }
+  .faq-q .q-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .faq-q .arrow {
+    font-size: 12px;
+    color: #aaa;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .faq-item.open .faq-q .arrow { transform: rotate(180deg); }
+  .faq-a {
+    display: none;
+    padding: 0 16px 16px;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.7;
+    border-top: 1px solid #f3f4f6;
+    padding-top: 12px;
+  }
+  .faq-item.open .faq-a { display: block; }
+  .faq-a .highlight {
+    display: inline-block;
+    background: #fef9c3;
+    color: #92400e;
+    border-radius: 5px;
+    padding: 0 4px;
+    font-weight: 600;
+  }
+  .faq-a .tip {
+    margin-top: 8px;
+    background: #eff6ff;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #1e40af;
+    display: flex;
+    gap: 5px;
+  }
+  .faq-cat-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #6b7280;
+    margin: 16px 0 8px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* ===== 浮动返回顶部 ===== */
+  .back-top {
+    position: fixed;
+    right: 20px;
+    bottom: 30px;
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #1a6fc4, #0fa3b1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+    box-shadow: 0 4px 14px rgba(26,111,196,0.4);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 100;
+  }
+  .back-top.show { opacity: 1; }
+
+  /* ===== 底部说明 ===== */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: #bbb;
+    padding: 10px 0 4px;
+  }
+
+  /* ===== 动效 ===== */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .compare-card, .faq-item, .search-hit {
+    animation: fadeIn 0.25s ease-out;
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">📋 2026年新版规范</div>
+  <h1>市场监测规范速查手册</h1>
+  <p>遇到问题随时查，不用打电话</p>
+</div>
+
+<!-- 搜索 -->
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="搜索：扫码天数、盘库、退出条件…" oninput="doSearch(this.value)">
+    <span class="search-clear" id="searchClear" onclick="clearSearch()">✕</span>
+  </div>
+</div>
+
+<!-- 搜索结果 -->
+<div class="search-results" id="searchResults">
+  <div class="search-result-title" id="searchResultTitle"></div>
+  <div id="searchResultList"></div>
+</div>
+
+<!-- Tab -->
+<div class="tabs-wrap" id="mainContent">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('compare')">
+      <span class="tab-icon">📊</span>变化速查
+    </div>
+    <div class="tab" onclick="switchTab('faq')">
+      <span class="tab-icon">❓</span>常见问题
+    </div>
+  </div>
+</div>
+
+<!-- 分类速查 -->
+<div class="content">
+  <div class="section active" id="sec-compare">
+    <div class="category-grid" id="catGrid"></div>
+    <div id="compareDetail"></div>
+  </div>
+
+  <div class="section" id="sec-faq">
+    <div id="faqList"></div>
+    <div class="footer">内容基于《行业市场监测体系工作规范（征求意见稿）》</div>
+  </div>
+</div>
+
+<div class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
+<script>
+// ==================== 数据 ====================
+const CATEGORIES = [
+  { id: 'sample', icon: '🏪', name: '样本户管理', count: 7 },
+  { id: 'collect', icon: '📱', name: '数据采集', count: 5 },
+  { id: 'quality', icon: '✅', name: '质量考核', count: 6 },
+  { id: 'warning', icon: '⚠️', name: '预警处理', count: 3 },
+  { id: 'incentive', icon: '💰', name: '激励费用', count: 2 },
+  { id: 'algo', icon: '🤖', name: '算法与口径', count: 3 },
+];
+
+const COMPARE_DATA = {
+  sample: {
+    title: '🏪 样本户管理',
+    items: [
+      {
+        aspect: '区间划分频率',
+        badge: 'major', badgeText: '重大变化',
+        old: '每月划分一次区间',
+        newText: '改为每季度划分一次',
+        note: '💡 减少频繁调整带来的操作负担，但意味着区间调整周期变长，样本户稳定性提升'
+      },
+      {
+        aspect: '后备样本户入网时间',
+        badge: 'major', badgeText: '重大变化',
+        old: '门店使用终端设备采集数据满6个月以上',
+        newText: '必须满12个月以上（要求翻倍）',
+        note: '💡 入网门槛提高，确保后备户有足够的历史数据作为质量评估依据'
+      },
+      {
+        aspect: '库存准确面要求',
+        badge: 'new', badgeText: '新增',
+        old: '无此要求',
+        newText: '新增：库存准确面≥90%才能被纳入后备样本户',
+        note: '💡 全新门槛，库存数据质量不够好的门店直接不能入围'
+      },
+      {
+        aspect: '退出冷却期',
+        badge: 'new', badgeText: '新增',
+        old: '退出后可以随时重新申请选取',
+        newText: '退出后须等待3个月，方可重新被选取',
+        note: '💡 防止"刷数据"后主动退出再重进，维护数据连续性'
+      },
+      {
+        aspect: '样本户建设思路',
+        badge: 'adjust', badgeText: '理念调整',
+        old: '配设备→培养刷销习惯→成为正式户',
+        newText: '先识别已有扫码数据的门店，从中优选质量好的',
+        note: '💡 从"培养"变"识别"，更注重真实数据基础，减少刷数行为'
+      },
+    ]
+  },
+  collect: {
+    title: '📱 数据采集要求',
+    items: [
+      {
+        aspect: '春节期间扫码天数',
+        badge: 'major', badgeText: '重大变化',
+        old: '春节期间当月扫码天数≥15天',
+        newText: '春节期间扫码天数≥20天，且连续2个月达标',
+        note: '💡 标准明显提高：天数从15→20天，且必须连续2个月，单月达标不够'
+      },
+      {
+        aspect: '盘库每次抽盘规格数',
+        badge: 'major', badgeText: '重大变化',
+        old: '每次抽盘5-10个规格',
+        newText: '每次抽盘≥10个规格（不含雪茄）',
+        note: '💡 下限从5个提高到10个，数量要求翻倍，需提醒客户经理'
+      },
+      {
+        aspect: '盘库间隔要求',
+        badge: 'new', badgeText: '新增',
+        old: '无明确间隔规定',
+        newText: '两次盘库间隔不少于14天（约2周）',
+        note: '💡 新增时间间隔要求，防止集中突击盘库应付考核'
+      },
+      {
+        aspect: '数据上传时限',
+        badge: 'new', badgeText: '新增',
+        old: '未明确具体上传截止时间',
+        newText: '非省级部署：每日6时前；省级部署：每日7时前',
+        note: '💡 明确了数据上传截止时间，延误上传将影响数据质量评分'
+      },
+      {
+        aspect: '四统一要求',
+        badge: 'new', badgeText: '新增',
+        old: '无此要求',
+        newText: '统一数据来源、统一还原算法、统一数据处理、统一数据口径',
+        note: '💡 全国层面统一口径，省级自行调整空间缩小'
+      },
+    ]
+  },
+  quality: {
+    title: '✅ 质量考核体系',
+    items: [
+      {
+        aspect: '数据校验级别',
+        badge: 'new', badgeText: '新增',
+        old: '四级校验（市级→省级→平台→行业）',
+        newText: '新增第五级：销售公司全国督导，每年不少于三分之二省级单位',
+        note: '💡 全国层面增加抽查督导，压力传导到省级'
+      },
+      {
+        aspect: '考核指标体系',
+        badge: 'adjust', badgeText: '调整',
+        old: '以完成率、扫码天数为核心指标',
+        newText: '增加库存准确面、数据上传及时率等新指标维度',
+        note: '💡 考核维度更全面，单纯刷天数不够，质量同等重要'
+      },
+      {
+        aspect: '样本户稳定性考核',
+        badge: 'adjust', badgeText: '调整',
+        old: '稳定性无量化门槛',
+        newText: '正式样本户退出率过高将影响省级评分',
+        note: '💡 引导各省注重培育高质量稳定样本户，减少频繁换户'
+      },
+    ]
+  },
+  warning: {
+    title: '⚠️ 预警处理机制',
+    items: [
+      {
+        aspect: '预警颜色分级',
+        badge: 'new', badgeText: '新增',
+        old: '无颜色分级，统一处理',
+        newText: '🔵 蓝色预警：提醒跟踪\n🔴 红色预警：5个工作日内必须处理并闭环',
+        note: '💡 实操重点：收到红色预警必须5个工作日内回复处理结果，否则视为失职'
+      },
+      {
+        aspect: '预警处理时限',
+        badge: 'new', badgeText: '新增',
+        old: '未规定明确时限',
+        newText: '红色预警：5个工作日\n蓝色预警：下次月度检查前',
+        note: '💡 有了明确时限要求，需建立台账管理，避免逾期'
+      },
+      {
+        aspect: '异常数据处理流程',
+        badge: 'adjust', badgeText: '调整',
+        old: '由省级自行判断处理',
+        newText: '重大异常须上报销售公司审核，省级不得自行关闭',
+        note: '💡 省级权限收紧，重大异常需上报，不能自行了结'
+      },
+    ]
+  },
+  incentive: {
+    title: '💰 激励费用',
+    items: [
+      {
+        aspect: '激励费用上限',
+        badge: 'new', badgeText: '首次明确',
+        old: '未明确全国统一上限',
+        newText: '每年每户上限2400元，在终端建设费中列支',
+        note: '💡 首次全国层面明确上限，各省不得超标。2400元/年 = 200元/月/户'
+      },
+      {
+        aspect: '费用列支渠道',
+        badge: 'new', badgeText: '新增规定',
+        old: '列支渠道不统一',
+        newText: '统一在终端建设费科目中列支，需单独建账',
+        note: '💡 财务处理有了统一规范，需提醒相关岗位调整账目处理方式'
+      },
+    ]
+  },
+  algo: {
+    title: '🤖 算法与口径',
+    items: [
+      {
+        aspect: '算法模型管理',
+        badge: 'new', badgeText: '新增章节',
+        old: '无独立章节，算法由各省自行维护',
+        newText: '新增独立章节：算法模型须经行业层面评审后方可调整，不得擅改',
+        note: '💡 算法统一管理，省级不能随意调整还原算法和匹配规则'
+      },
+      {
+        aspect: '数据还原口径',
+        badge: 'adjust', badgeText: '标准化',
+        old: '省级可根据当地情况调整还原系数',
+        newText: '全国统一还原算法，各省执行同一套计算标准',
+        note: '💡 全国数据可比性增强，但省级灵活性降低'
+      },
+      {
+        aspect: '文件定位升级',
+        badge: 'major', badgeText: '性质变化',
+        old: '福建省级行动方案（时效性、操作性文件）',
+        newText: '全国行业工作规范（制度性上位文件），省级方案须与之对齐',
+        note: '💡 这是培训最重要的背景！新文件是上位文件，原来的省级方案要修订对齐'
+      },
+    ]
+  }
+};
+
+const FAQ_DATA = [
+  {
+    cat: '📱 采集操作类',
+    items: [
+      {
+        icon: '📅',
+        q: '春节期间的扫码要求和以前有什么不同？',
+        a: '变化很大！旧规范只要求当月扫码<span class="highlight">≥15天</span>，新规范要求<span class="highlight">≥20天，而且必须连续2个月都达标</span>，缺一不可。<div class="tip">💡 实操提醒：春节跨2月（1月底+2月初），两个月都要达标，提前提醒老板别断扫！</div>'
+      },
+      {
+        icon: '📦',
+        q: '盘库怎么做才算合格？新要求是什么？',
+        a: '新规范对盘库有两项新要求：\n① 每次抽盘规格数从"5-10个"提高为<span class="highlight">至少10个规格</span>（雪茄不计入）\n② 两次盘库之间必须间隔<span class="highlight">至少14天</span>，不能集中应付。<div class="tip">💡 实操提醒：月底集中补盘库会被系统识别，请均匀分布盘库时间</div>'
+      },
+      {
+        icon: '⏰',
+        q: '数据什么时候必须上传到系统？',
+        a: '新规范明确了截止时间：\n• 非省级部署系统：每天<span class="highlight">早上6时前</span>上传完毕\n• 省级部署系统：每天<span class="highlight">早上7时前</span>上传完毕\n<div class="tip">💡 实操提醒：如果终端门店的设备当天没有联网同步，数据可能被标为"上传异常"</div>'
+      },
+    ]
+  },
+  {
+    cat: '🏪 样本户进退类',
+    items: [
+      {
+        icon: '🕐',
+        q: '门店想成为后备样本户，需要提前多久开始用设备？',
+        a: '新规范要求入网时间从以前的<span class="highlight">6个月提高到12个月</span>，整整翻了一倍。也就是说，门店必须持续使用终端采集设备满一年，才有资格进入后备池。<div class="tip">💡 实操提醒：及早发现有潜力的门店并推动入网，不要等到需要补样本户时才急</div>'
+      },
+      {
+        icon: '📊',
+        q: '库存准确面是什么？达到多少才行？',
+        a: '<span class="highlight">库存准确面</span>是指盘库时门店实际库存数量与系统记录相符的规格比例。新规范要求后备样本户的库存准确面<span class="highlight">≥90%</span>才能入围。<div class="tip">💡 通俗理解：盘100个规格，至少90个规格的实际库存和系统记录对得上，才算合格</div>'
+      },
+      {
+        icon: '🔄',
+        q: '门店退出了样本户，什么时候可以重新进来？',
+        a: '新规范新增了<span class="highlight">3个月冷却期</span>！以前退出可以立刻重新申请，现在必须等3个月后才能再次被选取。<div class="tip">💡 实操提醒：要稳住现有样本户，不要随意让其退出，退出后短期内无法补回</div>'
+      },
+      {
+        icon: '📅',
+        q: '区间划分还是每月调整吗？',
+        a: '不是了！新规范改为<span class="highlight">每季度划分一次</span>，不再每月调整。这意味着样本户的名单稳定性更高，一个季度内不会频繁变动。<div class="tip">💡 实操提醒：季度初完成区间划分后，当季不再重新分区，计划工作节奏要相应调整</div>'
+      },
+    ]
+  },
+  {
+    cat: '⚠️ 预警与考核类',
+    items: [
+      {
+        icon: '🔴',
+        q: '收到红色预警怎么办？有时间限制吗？',
+        a: '收到<span class="highlight">红色预警</span>，必须在<span class="highlight">5个工作日内处理并完成闭环回复</span>，超期将影响考核评分。红色预警代表严重数据异常，必须给出明确的处理结论。<div class="tip">💡 实操提醒：建议建立预警台账，收到当天就记录，每天跟进处理进度，避免遗漏</div>'
+      },
+      {
+        icon: '🔵',
+        q: '蓝色预警和红色预警有什么区别？',
+        a: '• <span class="highlight">🔵 蓝色预警</span>：提醒跟踪级别，数据出现波动但尚未严重，需关注，在下次月度检查前处理即可。\n• <span class="highlight">🔴 红色预警</span>：必须处理级别，数据存在严重异常，5个工作日内必须给出处理结论并闭环。<div class="tip">💡 实操提醒：不要轻视蓝色预警，连续蓝色预警可能升级为红色</div>'
+      },
+      {
+        icon: '📋',
+        q: '考核评分体系有哪些新变化？',
+        a: '新规范增加了多个考核维度：\n① 库存准确面（≥90%）新增入围门槛\n② 数据上传及时率（6时/7时前）\n③ 盘库合规性（间隔、规格数量）\n④ 省级还新增了全国督导考核（每年抽查）<div class="tip">💡 实操提醒：仅扫码天数合格已不够，各项质量指标都要兼顾</div>'
+      },
+    ]
+  },
+  {
+    cat: '💰 费用与政策类',
+    items: [
+      {
+        icon: '💵',
+        q: '激励费用每户最多给多少？从哪个科目出？',
+        a: '新规范首次全国统一明确：每户激励费用上限为<span class="highlight">每年2400元</span>（约200元/月），在<span class="highlight">终端建设费</span>科目中列支，需单独建账管理。<div class="tip">💡 实操提醒：各省不得超过2400元/年/户的上限，财务需调整科目处理方式</div>'
+      },
+      {
+        icon: '📑',
+        q: '新文件和省里的实施方案哪个管用？',
+        a: '新的《行业市场监测体系工作规范》是<span class="highlight">全国上位文件</span>，效力更高。省级的实施方案（如福建方案）需要根据新规范进行修订对齐，凡是与新规范有冲突的，以新规范为准。<div class="tip">💡 培训重点：遇到新旧规定冲突时，优先执行新的全国规范</div>'
+      },
+    ]
+  },
+];
+
+// 所有FAQ数据铺平，用于搜索
+const ALL_FAQ_FLAT = [];
+FAQ_DATA.forEach(cat => {
+  cat.items.forEach(item => {
+    ALL_FAQ_FLAT.push({ cat: cat.cat, ...item });
+  });
+});
+
+// 所有对比数据铺平，用于搜索
+const ALL_COMPARE_FLAT = [];
+Object.values(COMPARE_DATA).forEach(sec => {
+  sec.items.forEach(item => {
+    ALL_COMPARE_FLAT.push({ section: sec.title, ...item });
+  });
+});
+
+// ==================== 渲染 ====================
+function renderCatGrid() {
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = CATEGORIES.map(c => `
+    <div class="cat-card" id="cat-${c.id}" onclick="showCompare('${c.id}')">
+      <span class="cat-icon">${c.icon}</span>
+      <div class="cat-name">${c.name}</div>
+      <div class="cat-count">${c.count}项变化</div>
+    </div>
+  `).join('');
+}
+
+let currentCat = null;
+function showCompare(catId) {
+  document.querySelectorAll('.cat-card').forEach(el => el.classList.remove('selected'));
+  document.getElementById('cat-' + catId).classList.add('selected');
+
+  const data = COMPARE_DATA[catId];
+  currentCat = catId;
+  const detail = document.getElementById('compareDetail');
+
+  if (!data) { detail.innerHTML = ''; return; }
+
+  const badgeColor = { major: 'major', new: 'new', adjust: 'adjust' };
+  const badgeLabel = { major: '重大变化', new: '新增', adjust: '调整' };
+
+  detail.innerHTML = `<div class="compare-section-title">${data.title}</div>` +
+    data.items.map(item => {
+      const hasOld = item.old && item.old !== '无此要求' && item.old !== '无';
+      return `
+      <div class="compare-card">
+        <div class="aspect">
+          ${item.aspect}
+          <span class="change-badge ${item.badge}">${item.badgeText || badgeLabel[item.badge] || ''}</span>
+        </div>
+        ${hasOld ? `
+        <div class="compare-row">
+          <div class="compare-old">
+            <span class="label-old">▼ 旧规范</span>
+            ${item.old}
+          </div>
+          <div class="compare-new">
+            <span class="label-new">▲ 新规范</span>
+            ${item.newText}
+          </div>
+        </div>` : `
+        <div class="compare-note-new">✅ ${item.newText}</div>
+        `}
+        <div class="compare-note">💡 ${item.note.replace('💡 ','')}</div>
+      </div>`;
+    }).join('');
+
+  detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderFAQ() {
+  const list = document.getElementById('faqList');
+  list.innerHTML = FAQ_DATA.map(cat => `
+    <div class="faq-cat-title">${cat.cat}</div>
+    ${cat.items.map((item, idx) => `
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">
+          <div class="q-text"><span class="q-icon">${item.icon}</span>${item.q}</div>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-a">${item.a}</div>
+      </div>
+    `).join('')}
+  `).join('');
+}
+
+function toggleFAQ(el) {
+  el.classList.toggle('open');
+}
+
+// ==================== Tab 切换 ====================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['compare','faq'][i] === name);
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+}
+
+// ==================== 搜索 ====================
+function doSearch(val) {
+  const trimmed = val.trim();
+  const clear = document.getElementById('searchClear');
+  const results = document.getElementById('searchResults');
+  const mainContent = document.getElementById('mainContent');
+  const content = document.querySelector('.content');
+
+  if (!trimmed) {
+    clear.style.display = 'none';
+    results.classList.remove('show');
+    mainContent.style.display = '';
+    content.style.display = '';
+    return;
+  }
+  clear.style.display = 'block';
+  mainContent.style.display = 'none';
+  content.style.display = 'none';
+  results.classList.add('show');
+
+  const kw = trimmed.toLowerCase();
+  const hits = [];
+
+  // 搜FAQ
+  ALL_FAQ_FLAT.forEach(item => {
+    if (item.q.toLowerCase().includes(kw) || item.a.replace(/<[^>]+>/g,'').toLowerCase().includes(kw)) {
+      hits.push({
+        type: 'faq', tag: item.cat, q: item.q,
+        a: item.a.replace(/<[^>]+>/g,'').replace(/\n/g,' ').substring(0, 80) + '…'
+      });
+    }
+  });
+
+  // 搜对比数据
+  ALL_COMPARE_FLAT.forEach(item => {
+    const searchStr = (item.aspect + item.old + item.newText + item.note).toLowerCase();
+    if (searchStr.includes(kw)) {
+      hits.push({
+        type: 'compare', tag: item.section, q: item.aspect,
+        a: `旧：${item.old || '无'} → 新：${item.newText}`
+      });
+    }
+  });
+
+  const titleEl = document.getElementById('searchResultTitle');
+  const listEl = document.getElementById('searchResultList');
+  titleEl.textContent = hits.length > 0 ? `找到 ${hits.length} 条相关内容` : '';
+
+  if (hits.length === 0) {
+    listEl.innerHTML = `<div class="no-result"><span class="emoji">🔍</span>没找到"${trimmed}"相关内容<br>换个关键词试试？</div>`;
+    return;
+  }
+
+  listEl.innerHTML = hits.map(h => {
+    const hl = (str) => str.replace(new RegExp(trimmed.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), m => `<mark>${m}</mark>`);
+    return `
+      <div class="search-hit">
+        <span class="hit-tag">${h.tag}</span>
+        <div class="hit-q">${hl(h.q)}</div>
+        <div class="hit-a">${hl(h.a)}</div>
+      </div>`;
+  }).join('');
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  doSearch('');
+}
+
+// ==================== 返回顶部 ====================
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backTop');
+  btn.classList.toggle('show', window.scrollY > 300);
+});
+
+// ==================== 初始化 ====================
+renderCatGrid();
+renderFAQ();
+
+// 默认展开第一个FAQ
+setTimeout(() => {
+  const firstFaq = document.querySelector('.faq-item');
+  if (firstFaq) firstFaq.classList.add('open');
+}, 100);
+</script>
+</body>
+</html>
