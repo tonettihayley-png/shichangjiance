@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4月厦门异常客户分析报告</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        /* ===== 全局重置 & 基础 ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+            background: #f0f2f5;
+            color: #1a1d23;
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 24px;
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            background: linear-gradient(135deg, #1c4e8a 0%, #2563c0 60%, #3b82f6 100%);
+            color: white;
+            padding: 44px 40px;
+            border-radius: 16px;
+            margin-bottom: 28px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(37,99,192,0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 200px; height: 200px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 50%;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; left: -30px;
+            width: 160px; height: 160px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
+        }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .header p {
+            font-size: 13px;
+            opacity: 0.82;
+            letter-spacing: 0.3px;
+            position: relative;
+        }
+
+        /* ===== 提示框 ===== */
+        .notice {
+            background: #fffbeb;
+            border: 1px solid #f59e0b;
+            border-left: 4px solid #f59e0b;
+            border-radius: 10px;
+            padding: 14px 20px;
+            margin-bottom: 28px;
+        }
+        .notice h4 {
+            color: #92400e;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .notice p {
+            color: #78350f;
+            font-size: 13px;
+        }
+
+        /* ===== 统计卡片 ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 22px 16px 18px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+        }
+        .stat-card .icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .stat-card .value {
+            font-size: 30px;
+            font-weight: 700;
+            color: #2563c0;
+            line-height: 1;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: #8a93a5;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* 各色卡片变体 */
+        .stat-card.blue  .icon { background: #eff6ff; }
+        .stat-card.blue  .value { color: #2563c0; }
+        .stat-card.orange .icon { background: #fff7ed; }
+        .stat-card.orange .value { color: #ea580c; }
+        .stat-card.green .icon { background: #f0fdf4; }
+        .stat-card.green .value { color: #16a34a; }
+        .stat-card.purple .icon { background: #f5f3ff; }
+        .stat-card.purple .value { color: #7c3aed; }
+        .stat-card.red   .icon { background: #fef2f2; }
+        .stat-card.red   .value { color: #dc2626; }
+
+        /* ===== 异常率对比卡片 ===== */
+        .highlight-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px 28px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04);
+            margin-bottom: 28px;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .highlight-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1d23;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1.5px solid #f0f2f5;
+        }
+        .highlight-content {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        .highlight-item {
+            padding: 16px 24px;
+            border-radius: 12px;
+            flex: 1;
+            margin: 0 8px;
+            transition: background 0.15s;
+        }
+        .highlight-item:hover { background: #f8fafc; }
+        .highlight-item .rank-badge {
+            display: inline-block;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 20px;
+            margin-bottom: 8px;
+            color: white;
+        }
+        .highlight-item .name {
+            font-size: 13px;
+            color: #5a6478;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .highlight-item .val {
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .highlight-item .unit {
+            font-size: 12px;
+            font-weight: 400;
+            color: #8a93a5;
+        }
+        .highlight-item .sub {
+            font-size: 12px;
+            color: #aab0be;
+            margin-top: 4px;
+        }
+
+        /* 分公司专属配色 */
+        .c-siming  { color: #dc2626; }  /* 思明：红 */
+        .c-jimei   { color: #d97706; }  /* 集美：琥珀 */
+        .c-huli    { color: #0891b2; }  /* 湖里：青蓝 */
+        .c-diyi    { color: #4f46e5; }  /* 第一分局：靛蓝 */
+        
+        .bg-siming  { background: #dc2626; }
+        .bg-jimei   { background: #d97706; }
+        .bg-huli    { background: #0891b2; }
+        .bg-diyi    { background: #4f46e5; }
+
+        /* ===== 内容区域 ===== */
+        .content {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .section {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .section.full { grid-column: span 2; }
+        .section h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1d23;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1.5px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section h3 .icon-dot {
+            display: inline-block;
+            width: 4px; height: 16px;
+            background: #2563c0;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .section-sub {
+            color: #8a93a5;
+            font-size: 12px;
+            margin: -10px 0 14px;
+            font-weight: 400;
+        }
+
+        /* ===== 图表容器 ===== */
+        .chart-container { position: relative; height: 280px; }
+        .chart-container.bar  { height: 320px; }
+        .chart-container.line { height: 300px; }
+
+        /* ===== 表格 ===== */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th {
+            background: #f8fafc;
+            padding: 11px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 1.5px solid #e8edf2;
+            font-size: 12px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .data-table td {
+            padding: 11px 15px;
+            border-bottom: 1px solid #f0f4f8;
+            color: #2d3748;
+        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: #f8fafc; }
+
+        /* 徽章 */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge.primary { background: #eff6ff; color: #1d4ed8; }
+        .badge.success { background: #f0fdf4; color: #166534; }
+        .badge.warning { background: #fff7ed; color: #c2410c; }
+        .badge.danger  { background: #fef2f2; color: #b91c1c; }
+
+        /* ===== 交叉表 ===== */
+        .cross-table { overflow-x: auto; }
+        .cross-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .cross-table th {
+            background: #f8fafc;
+            padding: 11px 14px;
+            text-align: center;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 1.5px solid #e8edf2;
+            font-size: 12px;
+        }
+        .cross-table th:first-child { text-align: left; }
+        .cross-table td {
+            padding: 11px 14px;
+            text-align: center;
+            border-bottom: 1px solid #f0f4f8;
+            color: #2d3748;
+        }
+        .cross-table td:first-child { text-align: left; font-weight: 600; }
+        .cross-table tr:last-child td { border-bottom: none; }
+        .cross-table tr:hover td { background: #f8fafc; }
+        .cross-table td.highlight { background: #fff8e1; font-weight: 700; }
+        .cross-table td.danger { background: #fef2f2; color: #b91c1c; font-weight: 700; }
+
+        /* ===== 页脚 ===== */
+        .footer {
+            text-align: center;
+            padding: 28px;
+            color: #aab0be;
+            font-size: 12px;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .content { grid-template-columns: 1fr; }
+            .section.full { grid-column: span 1; }
+            .highlight-content { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    <div class="header">
+        <h1>📊 4月厦门异常客户分析报告</h1>
+        <p>数据周期：2026年4月1日 — 4月30日 &nbsp;|&nbsp; 统计口径：户次</p>
+    </div>
+
+    <!-- 重要提示 -->
+    <div class="notice">
+        <h4>⚠️ 重要说明</h4>
+        <p>本报告统计口径为<strong>异常户次</strong>（每条异常记录计1次），非去重客户数。同一样本户当月可能多次出现异常。</p>
+    </div>
+
+    <!-- 核心指标 -->
+    <div class="stats-grid">
+        <div class="stat-card blue">
+            <div class="icon">📋</div>
+            <div class="value">2,580</div>
+            <div class="label">异常总户次</div>
+        </div>
+        <div class="stat-card orange">
+            <div class="icon">👥</div>
+            <div class="value">336</div>
+            <div class="label">样本户总数</div>
+        </div>
+        <div class="stat-card green">
+            <div class="icon">🏢</div>
+            <div class="value">4</div>
+            <div class="label">分公司数</div>
+        </div>
+        <div class="stat-card purple">
+            <div class="icon">⚠️</div>
+            <div class="value">32</div>
+            <div class="label">异常类型数</div>
+        </div>
+        <div class="stat-card red">
+            <div class="icon">📅</div>
+            <div class="value">86</div>
+            <div class="label">日均异常户次</div>
+        </div>
+    </div>
+
+    <!-- 各公司异常率对比 -->
+    <div class="highlight-card">
+        <h3>📊 各分公司异常率对比（异常户次 / 样本户数）</h3>
+        <div class="highlight-content">
+            <div class="highlight-item">
+                <div><span class="rank-badge bg-siming">①</span></div>
+                <div class="name">思明分公司</div>
+                <div class="val c-siming">10.18<span class="unit"> 倍</span></div>
+                <div class="sub">60户样本 &nbsp;|&nbsp; 611户次</div>
+            </div>
+            <div class="highlight-item">
+                <div><span class="rank-badge bg-jimei">②</span></div>
+                <div class="name">集美分公司</div>
+                <div class="val c-jimei">8.63<span class="unit"> 倍</span></div>
+                <div class="sub">111户样本 &nbsp;|&nbsp; 958户次</div>
+            </div>
+            <div class="highlight-item">
+                <div><span class="rank-badge bg-huli">③</span></div>
+                <div class="name">湖里分公司</div>
+                <div class="val c-huli">6.43<span class="unit"> 倍</span></div>
+                <div class="sub">63户样本 &nbsp;|&nbsp; 405户次</div>
+            </div>
+            <div class="highlight-item">
+                <div><span class="rank-badge bg-diyi">④</span></div>
+                <div class="name">第一分局</div>
+                <div class="val c-diyi">5.94<span class="unit"> 倍</span></div>
+                <div class="sub">102户样本 &nbsp;|&nbsp; 606户次</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- 各分公司异常户次与异常率 -->
+        <div class="section full">
+            <h3><span class="icon-dot"></span>各分公司异常户次与异常率</h3>
+            <div class="chart-container bar">
+                <canvas id="districtRateChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 样本户数分布 -->
+        <div class="section">
+            <h3><span class="icon-dot"></span>各分公司样本户数</h3>
+            <div class="chart-container">
+                <canvas id="sampleChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 异常率排名 -->
+        <div class="section">
+            <h3><span class="icon-dot"></span>异常率排名</h3>
+            <div class="chart-container">
+                <canvas id="rankChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 样本户层级分布 -->
+        <div class="section">
+            <h3><span class="icon-dot"></span>样本户层级分布</h3>
+            <div class="chart-container">
+                <canvas id="levelChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 是否价采户 -->
+        <div class="section">
+            <h3><span class="icon-dot"></span>是否价采户分布</h3>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 每日趋势 -->
+        <div class="section full">
+            <h3><span class="icon-dot"></span>每日异常户次趋势</h3>
+            <div class="chart-container line">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 异常类型分布 -->
+        <div class="section full">
+            <h3><span class="icon-dot"></span>异常类型分布（Top 10）</h3>
+            <div class="chart-container bar">
+                <canvas id="anomalyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 热力矩阵 -->
+        <div class="section full">
+            <h3><span class="icon-dot"></span>异常类型 × 分公司 分布矩阵</h3>
+            <p class="section-sub">颜色深浅表示户次多少；销购比异常与其他类型独立色阶</p>
+            <div id="heatmapTable"></div>
+        </div>
+
+        <!-- 各分公司异常类型堆叠图 -->
+        <div class="section full">
+            <h3><span class="icon-dot"></span>各分公司异常类型户次分布（堆叠）</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:4px;">
+                <div>
+                    <p style="text-align:center;font-size:12px;color:#8a93a5;font-weight:500;margin-bottom:10px;letter-spacing:0.3px;">绝对户次</p>
+                    <div style="position:relative;height:300px;"><canvas id="anomalyStackChart"></canvas></div>
+                </div>
+                <div>
+                    <p style="text-align:center;font-size:12px;color:#8a93a5;font-weight:500;margin-bottom:10px;letter-spacing:0.3px;">占比结构（100% 堆叠）</p>
+                    <div style="position:relative;height:300px;"><canvas id="anomalyStackPctChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 非销购比异常分组对比 -->
+        <div class="section full">
+            <h3><span class="icon-dot"></span>非销购比异常类型 × 分公司分布（放大视图）</h3>
+            <p class="section-sub">剔除"销购比异常"后，聚焦其他 6 类异常的分公司分布差异</p>
+            <div style="position:relative;height:360px;"><canvas id="anomalyGroupChart"></canvas></div>
+        </div>
+
+        <!-- 交叉分析 -->
+        <div class="section full">
+            <h3><span class="icon-dot"></span>各分公司样本户层级异常户次分布</h3>
+            <div class="cross-table">
+                <table id="crossTable">
+                    <thead>
+                        <tr>
+                            <th>分公司</th>
+                            <th>样本户</th>
+                            <th>大户户次</th>
+                            <th>中户户次</th>
+                            <th>小户户次</th>
+                            <th>合计户次</th>
+                            <th>异常率</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div><!-- /.content -->
+
+    <div class="footer">
+        <p>报告生成时间：2026年5月7日 &nbsp;|&nbsp; 数据来源：4月份厦门异常客户剔除明细</p>
+    </div>
+
+</div><!-- /.container -->
+
+<script>
+// ============================================================
+//  颜色体系
+// ============================================================
+// 分公司专属色（高对比、商务专业）
+const DISTRICT_COLORS = {
+    '思明分公司': { solid: '#dc2626', light: 'rgba(220,38,38,0.12)',  mid: 'rgba(220,38,38,0.72)' },
+    '集美分公司': { solid: '#d97706', light: 'rgba(217,119,6,0.12)',  mid: 'rgba(217,119,6,0.72)'  },
+    '湖里分公司': { solid: '#0891b2', light: 'rgba(8,145,178,0.12)',  mid: 'rgba(8,145,178,0.72)'  },
+    '第一分局':   { solid: '#4f46e5', light: 'rgba(79,70,229,0.12)',  mid: 'rgba(79,70,229,0.72)'  }
+};
+const DISTRICT_LIST  = ['思明分公司', '集美分公司', '湖里分公司', '第一分局'];
+const DISTRICT_SOLID = DISTRICT_LIST.map(d => DISTRICT_COLORS[d].solid);
+const DISTRICT_MID   = DISTRICT_LIST.map(d => DISTRICT_COLORS[d].mid);
+
+// 异常类型色板（7色，区分度高）
+const ANOMALY_COLORS = [
+    '#e11d48',  // 销购比异常  —— 玫红
+    '#059669',  // 零售销量为零 —— 翠绿
+    '#d97706',  // 库存偏高     —— 琥珀
+    '#7c3aed',  // 损益异常     —— 紫
+    '#0891b2',  // 刷扫异常     —— 青
+    '#dc2626',  // 销量偏高     —— 红（深）
+    '#374151'   // 勾稽关系异常 —— 深灰
+];
+
+// ============================================================
+//  全局 Chart 默认配置
+// ============================================================
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#6b7280';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+Chart.defaults.plugins.legend.labels.padding = 16;
+Chart.defaults.plugins.legend.labels.font = { size: 12 };
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: '600' };
+Chart.defaults.plugins.tooltip.bodyFont  = { size: 12 };
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,23,42,0.88)';
+
+// 柔和网格线辅助函数
+function softGrid(alpha) {
+    return { color: `rgba(0,0,0,${alpha||0.06})`, lineWidth: 1 };
+}
+
+// ============================================================
+//  数据
+// ============================================================
+const districtData = {
+    '思明分公司': { sample: 60,  count: 611, rate: 10.18 },
+    '集美分公司': { sample: 111, count: 958, rate: 8.63  },
+    '湖里分公司': { sample: 63,  count: 405, rate: 6.43  },
+    '第一分局':   { sample: 102, count: 606, rate: 5.94  }
+};
+
+const levelData = { '大户': 1298, '中户': 678, '小户': 604 };
+const priceData = { '非价采户': 2302, '价采户': 278 };
+
+const trendData = {
+    '04-01':93,'04-02':97,'04-03':103,'04-04':102,'04-05':107,
+    '04-06':99,'04-07':91,'04-08':91, '04-09':91, '04-10':89,
+    '04-11':92,'04-12':90,'04-13':84,'04-14':83, '04-15':86,
+    '04-16':89,'04-17':89,'04-18':86,'04-19':89, '04-20':84,
+    '04-21':78,'04-22':79,'04-23':104,'04-24':80,'04-25':79,
+    '04-26':73,'04-27':65,'04-28':66,'04-29':70, '04-30':51
+};
+
+const anomalyData = {
+    '客户前140天销购比不在合理区间内': 2382,
+    '当日总零售销量<=0': 59,
+    '当日总库存量>前140天批发销量*1.4': 5,
+    '总量勾稽关系异常': 14,
+    '当日损益量>库存量*0.02': 14,
+    '当日总零售销量>近140天批发销量*0.1': 2,
+    '刷扫异常': 2,
+    '多异常组合': 102
+};
+
+const crossData = [
+    { name:'思明分公司', sample:60,  large:342, mid:128, small:141, total:611, rate:10.18 },
+    { name:'集美分公司', sample:111, large:503, mid:224, small:231, total:958, rate:8.63  },
+    { name:'湖里分公司', sample:63,  large:168, mid:118, small:119, total:405, rate:6.43  },
+    { name:'第一分局',   sample:102, large:285, mid:208, small:113, total:606, rate:5.94  }
+];
+
+const anomalyByDistrict = {
+    '销购比异常':   { '思明分公司':594, '集美分公司':932, '湖里分公司':380, '第一分局':576 },
+    '零售销量为零': { '思明分公司': 16, '集美分公司': 23, '湖里分公司': 26, '第一分局': 21 },
+    '库存偏高':     { '思明分公司':  5, '集美分公司':  5, '湖里分公司': 18, '第一分局': 12 },
+    '损益异常':     { '思明分公司': 11, '集美分公司': 17, '湖里分公司':  3, '第一分局':  4 },
+    '刷扫异常':     { '思明分公司':  8, '集美分公司': 21, '湖里分公司':  0, '第一分局':  0 },
+    '销量偏高':     { '思明分公司':  2, '集美分公司':  4, '湖里分公司':  1, '第一分局':  0 },
+    '勾稽关系异常': { '思明分公司':  1, '集美分公司':  7, '湖里分公司':  0, '第一分局': 11 }
+};
+const anomalyTypes = Object.keys(anomalyByDistrict);
+
+// ============================================================
+//  图表 1: 各分公司异常户次 + 异常率（双轴）
+// ============================================================
+new Chart(document.getElementById('districtRateChart'), {
+    type: 'bar',
+    data: {
+        labels: DISTRICT_LIST,
+        datasets: [
+            {
+                label: '异常户次',
+                data: DISTRICT_LIST.map(d => districtData[d].count),
+                backgroundColor: DISTRICT_SOLID,
+                borderRadius: 8,
+                borderSkipped: false,
+                yAxisID: 'y'
+            },
+            {
+                label: '异常率（倍）',
+                data: DISTRICT_LIST.map(d => districtData[d].rate),
+                type: 'line',
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99,102,241,0.08)',
+                fill: false,
+                yAxisID: 'y1',
+                tension: 0.35,
+                pointRadius: 7,
+                pointHoverRadius: 9,
+                pointBackgroundColor: DISTRICT_SOLID,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                borderWidth: 2.5
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'top' },
+            datalabels: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                position: 'left',
+                title: { display: true, text: '异常户次', color: '#6b7280', font: { size: 12 } },
+                grid: softGrid(0.07),
+                border: { display: false }
+            },
+            y1: {
+                beginAtZero: true,
+                position: 'right',
+                title: { display: true, text: '异常率（倍）', color: '#6b7280', font: { size: 12 } },
+                grid: { display: false },
+                border: { display: false }
+            },
+            x: { grid: { display: false }, border: { display: false } }
+        }
+    }
+});
+
+// ============================================================
+//  图表 2: 样本户数（甜甜圈）
+// ============================================================
+new Chart(document.getElementById('sampleChart'), {
+    type: 'doughnut',
+    data: {
+        labels: DISTRICT_LIST,
+        datasets: [{
+            data: DISTRICT_LIST.map(d => districtData[d].sample),
+            backgroundColor: DISTRICT_SOLID,
+            borderWidth: 0,
+            hoverOffset: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+            legend: { position: 'bottom' },
+            datalabels: {
+                color: '#fff',
+                font: { size: 11, weight: '600' },
+                formatter: (value, ctx) => {
+                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                    return `${value}户\n${(value/total*100).toFixed(1)}%`;
+                }
+            }
+        }
+    },
+    plugins: [ChartDataLabels]
+});
+
+// ============================================================
+//  图表 3: 异常率排名（横向柱状）
+// ============================================================
+new Chart(document.getElementById('rankChart'), {
+    type: 'bar',
+    data: {
+        labels: DISTRICT_LIST,
+        datasets: [{
+            data: DISTRICT_LIST.map(d => districtData[d].rate),
+            backgroundColor: DISTRICT_SOLID,
+            borderRadius: { topRight: 6, bottomRight: 6 },
+            borderSkipped: false
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            datalabels: {
+                color: '#1a1d23',
+                font: { size: 12, weight: '700' },
+                formatter: v => `${v} 倍`,
+                anchor: 'end',
+                align: 'right',
+                offset: 4
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                grid: softGrid(0.07),
+                border: { display: false },
+                title: { display: true, text: '异常率（倍）', color: '#6b7280', font: { size: 12 } }
+            },
+            y: { grid: { display: false }, border: { display: false } }
+        },
+        layout: { padding: { right: 52 } }
+    },
+    plugins: [ChartDataLabels]
+});
+
+// ============================================================
+//  图表 4: 样本户层级（甜甜圈）
+// ============================================================
+new Chart(document.getElementById('levelChart'), {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys(levelData),
+        datasets: [{
+            data: Object.values(levelData),
+            backgroundColor: ['#2563c0','#0891b2','#64748b'],
+            borderWidth: 0,
+            hoverOffset: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+            legend: { position: 'bottom' },
+            datalabels: {
+                color: '#fff',
+                font: { size: 11, weight: '600' },
+                formatter: (value, ctx) => {
+                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                    return `${value}\n${(value/total*100).toFixed(1)}%`;
+                }
+            }
+        }
+    },
+    plugins: [ChartDataLabels]
+});
+
+// ============================================================
+//  图表 5: 是否价采户（饼图）
+// ============================================================
+new Chart(document.getElementById('priceChart'), {
+    type: 'pie',
+    data: {
+        labels: Object.keys(priceData),
+        datasets: [{
+            data: Object.values(priceData),
+            backgroundColor: ['#64748b','#f59e0b'],
+            borderWidth: 0,
+            hoverOffset: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' },
+            datalabels: {
+                color: '#fff',
+                font: { size: 12, weight: '700' },
+                formatter: (value, ctx) => {
+                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                    return `${value}\n${(value/total*100).toFixed(1)}%`;
+                }
+            }
+        }
+    },
+    plugins: [ChartDataLabels]
+});
+
+// ============================================================
+//  图表 6: 每日趋势（折线）
+// ============================================================
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: Object.keys(trendData),
+        datasets: [{
+            label: '异常户次',
+            data: Object.values(trendData),
+            borderColor: '#2563c0',
+            backgroundColor: 'rgba(37,99,192,0.08)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3.5,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#2563c0',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            borderWidth: 2.5
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            datalabels: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: softGrid(0.07),
+                border: { display: false }
+            },
+            x: {
+                grid: { display: false },
+                border: { display: false },
+                ticks: { maxRotation: 45, minRotation: 45 }
+            }
+        }
+    }
+});
+
+// ============================================================
+//  图表 7: 异常类型 Top10（横向柱状）
+// ============================================================
+const anomalyLabels = Object.keys(anomalyData);
+const anomalyValues = Object.values(anomalyData);
+const anomalyBg = anomalyLabels.map((_, i) => {
+    const palette = ['#e11d48','#2563c0','#d97706','#374151','#7c3aed','#0891b2','#059669','#dc2626'];
+    return palette[i % palette.length];
+});
+new Chart(document.getElementById('anomalyChart'), {
+    type: 'bar',
+    data: {
+        labels: anomalyLabels,
+        datasets: [{
+            data: anomalyValues,
+            backgroundColor: anomalyBg,
+            borderRadius: { topRight: 6, bottomRight: 6 },
+            borderSkipped: false
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            datalabels: {
+                color: '#1a1d23',
+                font: { size: 11, weight: '600' },
+                anchor: 'end', align: 'right', offset: 4,
+                formatter: v => v > 0 ? v : ''
+            }
+        },
+        scales: {
+            x: { beginAtZero: true, grid: softGrid(0.07), border: { display: false } },
+            y: { grid: { display: false }, border: { display: false } }
+        },
+        layout: { padding: { right: 50 } }
+    },
+    plugins: [ChartDataLabels]
+});
+
+// ============================================================
+//  热力矩阵
+// ============================================================
+(function buildHeatmap() {
+    const container = document.getElementById('heatmapTable');
+    const maxOther = Math.max(...Object.entries(anomalyByDistrict)
+        .filter(([k]) => k !== '销购比异常')
+        .flatMap(([, v]) => Object.values(v)));
+    const maxMain  = Math.max(...Object.values(anomalyByDistrict['销购比异常']));
+
+    function cellStyle(val, maxVal, isMain) {
+        if (val === 0) return 'background:#f8fafc;color:#c8cdd6;';
+        const ratio = val / maxVal;
+        const alpha = 0.15 + ratio * 0.75;
+        const base  = isMain ? [220, 38, 38] : [37, 99, 192];
+        const textColor = alpha > 0.48 ? '#fff' : '#1a1d23';
+        const fw = alpha > 0.48 ? '700' : '600';
+        return `background:rgba(${base.join(',')},${alpha.toFixed(2)});color:${textColor};font-weight:${fw};`;
+    }
+
+    let html = `<table style="width:100%;border-collapse:collapse;font-size:13px;border-radius:10px;overflow:hidden;">
+        <thead><tr>
+            <th style="background:#f0f4f8;padding:11px 16px;text-align:left;border-bottom:1.5px solid #e2e8f0;color:#4a5568;font-weight:600;font-size:12px;min-width:110px;">异常类型</th>
+            ${DISTRICT_LIST.map(d => `<th style="background:#f0f4f8;padding:11px 16px;text-align:center;border-bottom:1.5px solid #e2e8f0;color:#4a5568;font-weight:600;font-size:12px;">${d}</th>`).join('')}
+            <th style="background:#f0f4f8;padding:11px 16px;text-align:center;border-bottom:1.5px solid #e2e8f0;color:#4a5568;font-weight:600;font-size:12px;">合计</th>
+        </tr></thead><tbody>`;
+
+    anomalyTypes.forEach(type => {
+        const isMain   = type === '销购比异常';
+        const maxVal   = isMain ? maxMain : maxOther;
+        const rowTotal = DISTRICT_LIST.reduce((s, d) => s + anomalyByDistrict[type][d], 0);
+        html += `<tr>
+            <td style="padding:11px 16px;border-bottom:1px solid #f0f4f8;font-weight:600;color:#2d3748;">${type}</td>
+            ${DISTRICT_LIST.map(d => {
+                const v = anomalyByDistrict[type][d];
+                return `<td style="padding:11px 16px;text-align:center;border-bottom:1px solid #f0f4f8;border-radius:4px;${cellStyle(v, maxVal, isMain)}">${v}</td>`;
+            }).join('')}
+            <td style="padding:11px 16px;text-align:center;border-bottom:1px solid #f0f4f8;font-weight:700;color:#1a1d23;background:#f8fafc;">${rowTotal}</td>
+        </tr>`;
+    });
+
+    html += `<tr>
+        <td style="padding:11px 16px;font-weight:700;color:#1a1d23;background:#f0f4f8;">合计</td>
+        ${DISTRICT_LIST.map(d => {
+            const total = anomalyTypes.reduce((s, t) => s + anomalyByDistrict[t][d], 0);
+            return `<td style="padding:11px 16px;text-align:center;font-weight:700;color:#1a1d23;background:#f0f4f8;">${total}</td>`;
+        }).join('')}
+        <td style="padding:11px 16px;text-align:center;font-weight:700;color:#1a1d23;background:#f0f4f8;">2580</td>
+    </tr></tbody></table>`;
+
+    container.innerHTML = html;
+})();
+
+// ============================================================
+//  图表 8: 堆叠柱状图（绝对值）
+// ============================================================
+new Chart(document.getElementById('anomalyStackChart'), {
+    type: 'bar',
+    data: {
+        labels: DISTRICT_LIST,
+        datasets: anomalyTypes.map((type, i) => ({
+            label: type,
+            data: DISTRICT_LIST.map(d => anomalyByDistrict[type][d]),
+            backgroundColor: ANOMALY_COLORS[i],
+            borderWidth: 0,
+            borderRadius: i === anomalyTypes.length - 1 ? { topLeft:6, topRight:6 } : 0,
+            borderSkipped: false
+        }))
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
+            datalabels: { display: false }
+        },
+        scales: {
+            x: { stacked: true, grid: { display: false }, border: { display: false } },
+            y: { stacked: true, grid: softGrid(0.07), border: { display: false }, title: { display: true, text: '户次', color: '#6b7280', font: { size: 12 } } }
+        }
+    }
+});
+
+// ============================================================
+//  图表 9: 堆叠柱状图（100% 占比）
+// ============================================================
+new Chart(document.getElementById('anomalyStackPctChart'), {
+    type: 'bar',
+    data: {
+        labels: DISTRICT_LIST,
+        datasets: anomalyTypes.map((type, i) => ({
+            label: type,
+            data: DISTRICT_LIST.map(d => {
+                const total = anomalyTypes.reduce((s, t) => s + anomalyByDistrict[t][d], 0);
+                return +(anomalyByDistrict[type][d] / total * 100).toFixed(1);
+            }),
+            backgroundColor: ANOMALY_COLORS[i],
+            borderWidth: 0
+        }))
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
+            datalabels: {
+                display: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 2,
+                formatter: v => v + '%',
+                color: '#fff',
+                font: { size: 10, weight: '600' }
+            }
+        },
+        scales: {
+            x: { stacked: true, grid: { display: false }, border: { display: false } },
+            y: { stacked: true, max: 100, grid: softGrid(0.07), border: { display: false }, title: { display: true, text: '占比 (%)', color: '#6b7280', font: { size: 12 } } }
+        }
+    },
+    plugins: [ChartDataLabels]
+});
+
+// ============================================================
+//  图表 10: 非销购比异常分组柱状图
+// ============================================================
+const otherTypes = anomalyTypes.filter(t => t !== '销购比异常');
+new Chart(document.getElementById('anomalyGroupChart'), {
+    type: 'bar',
+    data: {
+        labels: otherTypes,
+        datasets: DISTRICT_LIST.map((d, i) => ({
+            label: d,
+            data: otherTypes.map(t => anomalyByDistrict[t][d]),
+            backgroundColor: DISTRICT_SOLID[i],
+            borderRadius: 5,
+            borderSkipped: false
+        }))
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'top' },
+            datalabels: {
+                display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+                formatter: v => v,
+                color: '#1a1d23',
+                font: { size: 10, weight: '600' },
+                anchor: 'end', align: 'top', offset: 2
+            }
+        },
+        scales: {
+            x: { grid: { display: false }, border: { display: false } },
+            y: { beginAtZero: true, grid: softGrid(0.07), border: { display: false }, title: { display: true, text: '户次', color: '#6b7280', font: { size: 12 } } }
+        }
+    },
+    plugins: [ChartDataLabels]
+});
+
+// ============================================================
+//  交叉表渲染
+// ============================================================
+const tableBody = document.querySelector('#crossTable tbody');
+const maxRate   = Math.max(...crossData.map(r => r.rate));
+crossData.forEach(row => {
+    const isHighest = row.rate === maxRate;
+    tableBody.innerHTML += `<tr>
+        <td>${row.name}</td>
+        <td>${row.sample}</td>
+        <td>${row.large}</td>
+        <td>${row.mid}</td>
+        <td>${row.small}</td>
+        <td style="font-weight:700;">${row.total}</td>
+        <td class="${isHighest ? 'danger' : ''}">${row.rate} 倍</td>
+    </tr>`;
+});
+</script>
+</body>
+</html>
