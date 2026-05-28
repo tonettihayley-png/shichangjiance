@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年厦门流通价格监测报告（5月27日）</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root { --bg: #f0f3f8; --card-bg: #ffffff; --primary: #1a3a5c; --accent: #2F5496;
+  --red: #e74c3c; --green: #27ae60; --orange: #e67e22; --text: #333; --text-secondary: #666;
+  --border: #e8ecf1; --shadow: 0 2px 12px rgba(0,0,0,0.06); }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height:1.6; }
+.container { max-width:1200px; margin:0 auto; padding:16px; }
+.header { background: linear-gradient(135deg, var(--primary), var(--accent)); color:#fff; padding:28px 32px; border-radius:12px; margin-bottom:20px; }
+.header h1 { font-size:22px; font-weight:600; margin-bottom:4px; }
+.header .meta { font-size:13px; opacity:0.85; }
+.header .trend-summary { margin-top:10px; font-size:13px; opacity:0.9; background:rgba(255,255,255,0.12); padding:8px 14px; border-radius:6px; }
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:20px; }
+.kpi-card { background:var(--card-bg); border-radius:10px; padding:18px 20px; box-shadow:var(--shadow); border-left:4px solid var(--accent); }
+.kpi-card.warn { border-left-color: var(--orange); }
+.kpi-card.danger { border-left-color: var(--red); }
+.kpi-card .kpi-label { font-size:12px; color:var(--text-secondary); margin-bottom:4px; }
+.kpi-card .kpi-value { font-size:28px; font-weight:700; }
+.kpi-card .kpi-sub { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+.kpi-card .up { color:var(--red); }
+.kpi-card .down { color:var(--green); }
+.conclusion-list { display:grid; gap:10px; }
+.conclusion-item { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:#fbfcfe; }
+.conclusion-no { flex:0 0 24px; width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; text-align:center; line-height:24px; font-size:12px; font-weight:700; }
+.conclusion-text { font-size:14px; color:var(--text); }
+.insight-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+.insight-card { border:1px solid var(--border); border-radius:8px; padding:12px 14px; background:#fbfcfe; }
+.insight-card .tag { display:inline-block; font-size:11px; color:#fff; background:var(--accent); padding:2px 8px; border-radius:12px; margin-bottom:7px; }
+.insight-card.danger .tag { background:var(--red); }
+.insight-card.warn .tag { background:var(--orange); }
+.insight-card .name { font-size:14px; font-weight:700; margin-bottom:5px; color:var(--primary); }
+.insight-card .meta { font-size:12px; color:var(--text-secondary); }
+.filter-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:12px 0 16px; }
+.filter-bar input, .filter-bar select { border:1px solid var(--border); border-radius:6px; padding:7px 10px; font-size:13px; background:#fff; }
+.filter-bar label { display:flex; gap:5px; align-items:center; font-size:13px; color:var(--text-secondary); }
+.section { background:var(--card-bg); border-radius:10px; padding:20px 24px; margin-bottom:16px; box-shadow:var(--shadow); }
+.section h2 { font-size:16px; color:var(--primary); margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid var(--accent); }
+.chart-container { width:100%; height:380px; }
+.chart-container.short { height:300px; }
+.decliner-card { display:flex; align-items:center; padding:10px 14px; margin:6px 0; background:#fff5f5; border-radius:8px; border-left:3px solid var(--red); }
+.decliner-card .dd-spec { flex:1; font-weight:600; font-size:14px; }
+.decliner-card .dd-tier { color:var(--text-secondary); font-size:12px; margin-right:12px; }
+.decliner-card .dd-decline { color:var(--green); font-weight:600; font-size:14px; }
+.decliner-card .dd-weeks { color:var(--text-secondary); font-size:11px; margin-left:8px; }
+.tier-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+.tier-tab { padding:6px 16px; border-radius:20px; border:1px solid var(--border); cursor:pointer; font-size:13px; background:#fff; transition:all .2s; }
+.tier-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.tier-table { width:100%; border-collapse:collapse; font-size:13px; }
+.tier-table th { background:var(--accent); color:#fff; padding:8px 10px; text-align:center; font-weight:500; }
+.tier-table td { padding:7px 10px; text-align:center; border-bottom:1px solid var(--border); }
+.tier-table tr:hover { background:#f5f7fa; }
+.data-table-container { max-height:500px; overflow:auto; }
+.data-table { width:100%; border-collapse:collapse; font-size:12px; }
+.data-table th { background:var(--accent); color:#fff; padding:6px 8px; position:sticky; top:0; z-index:1; }
+.data-table td { padding:5px 8px; border-bottom:1px solid var(--border); text-align:center; }
+.footer { text-align:center; color:var(--text-secondary); font-size:12px; padding:20px; }
+@media (max-width:768px) {
+  .container { padding:8px; }
+  .header { padding:16px; }
+  .header h1 { font-size:18px; }
+  .kpi-grid { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .chart-container, .chart-container.short { height:280px; }
+  .section { padding:14px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>2026年全市重点监测品规市场流通价格行情</h1>
+  <div class="meta">5月27日 | 报告日期：2026年5月27日 | 监测品规：210个</div>
+  <div class="trend-summary">近6周回暖面变化：一档↑41.2个百分点，二档↑58.3个百分点，三档↑78.3个百分点，四档↑69.3个百分点，五档及以下↑60.8个百分点；倒挂恶化档位：一档、二档、三档；一档3个品规连续下跌≥3周；二档1个品规连续下跌≥3周</div>
+</div>
+
+<div class="section">
+  <h2>主要结论</h2>
+  <div class="conclusion-list">
+
+    <div class="conclusion-item">
+      <div class="conclusion-no">1</div>
+      <div class="conclusion-text">本周监测210个品规，153个流通价环比回升，回暖面72.9%，三档、四档回暖表现相对靠前。</div>
+    </div>
+
+    <div class="conclusion-item">
+      <div class="conclusion-no">2</div>
+      <div class="conclusion-text">价格倒挂面为50.5%，涉及106个品规，新增倒挂1个；一档、二档、三档、四档仍需重点跟踪。</div>
+    </div>
+
+    <div class="conclusion-item">
+      <div class="conclusion-no">3</div>
+      <div class="conclusion-text">黄鹤楼(1916宝相细支)、芙蓉王(锦绣世纪3mg)、利群(休闲银细支)等品规溢价表现较强，可作为观察市场信心和高端需求韧性的重点样本。</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">回暖面</div>
+    <div class="kpi-value">72.9%</div>
+    <div class="kpi-sub">153/210 品规环比回升</div>
+  </div>
+  <div class="kpi-card warn">
+    <div class="kpi-label">倒挂面</div>
+    <div class="kpi-value">50.5%</div>
+    <div class="kpi-sub">106 品规倒挂 · 新增1个</div>
+  </div>
+  <div class="kpi-card danger">
+    <div class="kpi-label">重点关注</div>
+    <div class="kpi-value">4</div>
+    <div class="kpi-sub">个品规连续下跌≥3周</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>本周重点研判</h2>
+  <div class="insight-grid">
+
+    <div class="insight-card danger">
+      <span class="tag">新增倒挂</span>
+      <div class="name">娇子(X)</div>
+      <div class="meta">五档及以下 · 均价96.2元 · 环比-1.03% · 溢价率-0.77%</div>
+    </div>
+
+    <div class="insight-card ">
+      <span class="tag">环比涨幅突出</span>
+      <div class="name">七匹狼(金砖中支)</div>
+      <div class="meta">一档 · 均价722.5元 · 环比3.96% · 溢价率-5.33%</div>
+    </div>
+
+    <div class="insight-card ">
+      <span class="tag">环比涨幅突出</span>
+      <div class="name">中华(软)(3)</div>
+      <div class="meta">二档 · 均价557.5元 · 环比2.53% · 溢价率-4.37%</div>
+    </div>
+
+    <div class="insight-card ">
+      <span class="tag">环比涨幅突出</span>
+      <div class="name">七匹狼(古田金细支)</div>
+      <div class="meta">三档 · 均价253.8元 · 环比3.05% · 溢价率-3.52%</div>
+    </div>
+
+    <div class="insight-card ">
+      <span class="tag">环比涨幅突出</span>
+      <div class="name">金桥(炫影细支)</div>
+      <div class="meta">四档 · 均价200.0元 · 环比6.67% · 溢价率-11.11%</div>
+    </div>
+
+    <div class="insight-card danger">
+      <span class="tag">环比降幅突出</span>
+      <div class="name">红旗渠(新版银河)</div>
+      <div class="meta">五档及以下 · 均价65.8元 · 环比-5.40% · 溢价率47.75%</div>
+    </div>
+
+    <div class="insight-card ">
+      <span class="tag">区域价差较大</span>
+      <div class="name">黄鹤楼(1916宝相细支)</div>
+      <div class="meta">一档 · 价差200.0元/条 · 高2700.0 / 低2500.0</div>
+    </div>
+
+    <div class="insight-card ">
+      <span class="tag">区域价差较大</span>
+      <div class="name">芙蓉王(锦绣世纪3mg)</div>
+      <div class="meta">一档 · 价差130.0元/条 · 高1300.0 / 低1170.0</div>
+    </div>
+
+    <div class="insight-card ">
+      <span class="tag">区域价差较大</span>
+      <div class="name">白沙(和天下尊品细支)</div>
+      <div class="meta">一档 · 价差120.0元/条 · 高1150.0 / 低1030.0</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h2>📈 回暖面趋势（近6周）</h2>
+  <div class="chart-container" id="chart-recovery"></div>
+</div>
+
+<div class="section">
+  <h2>📉 倒挂面趋势（近6周）</h2>
+  <div class="chart-container" id="chart-inversion"></div>
+</div>
+
+<div class="section">
+  <h2>📊 全市整体趋势（近6周）</h2>
+  <div class="chart-container" id="chart-overall"></div>
+</div>
+
+<div class="section">
+  <h2>🏷 品牌趋势（近6周）</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="chart-container short" id="chart-brand-zhonghua"></div>
+    <div class="chart-container short" id="chart-brand-shengchan"></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>⚠️ 持续下跌品规（连续≥3周）</h2>
+<p style="font-weight:600;margin-top:10px;color:var(--primary);">一档（3个）</p>
+  <div class="decliner-card">
+    <span class="dd-tier">一档</span>
+    <span class="dd-spec">云烟(大重九细支久仰)</span>
+    <span class="dd-decline">-1.9%</span>
+    <span class="dd-weeks">5月13日 → 5月20日 → 5月27日</span>
+  </div>
+  <div class="decliner-card">
+    <span class="dd-tier">一档</span>
+    <span class="dd-spec">娇子(国宝之恋细支)</span>
+    <span class="dd-decline">-0.8%</span>
+    <span class="dd-weeks">5月13日 → 5月20日 → 5月27日</span>
+  </div>
+  <div class="decliner-card">
+    <span class="dd-tier">一档</span>
+    <span class="dd-spec">玉溪(细支翡翠)</span>
+    <span class="dd-decline">-0.5%</span>
+    <span class="dd-weeks">5月13日 → 5月20日 → 5月27日</span>
+  </div><p style="font-weight:600;margin-top:10px;color:var(--primary);">二档（1个）</p>
+  <div class="decliner-card">
+    <span class="dd-tier">二档</span>
+    <span class="dd-spec">七匹狼(古田纯青细支)</span>
+    <span class="dd-decline">-1.1%</span>
+    <span class="dd-weeks">5月13日 → 5月20日 → 5月27日</span>
+  </div><p style="margin-top:12px;font-size:13px;color:var(--text-secondary);">共 4 个品规连续3周以上环比下跌，建议重点关注。</p>
+</div>
+
+<div class="section">
+  <h2>🔍 各档位品规明细（5月27日）</h2>
+  <div class="tier-tabs" id="tier-tabs">
+    <span class="tier-tab active" data-tier="一档">一档（34个 · 回暖58.8% · 倒挂52.9%）</span>
+    <span class="tier-tab" data-tier="二档">二档（24个 · 回暖70.8% · 倒挂70.8%）</span>
+    <span class="tier-tab" data-tier="三档">三档（42个 · 回暖88.1% · 倒挂57.1%）</span>
+    <span class="tier-tab" data-tier="四档">四档（59个 · 回暖78.0% · 倒挂67.8%）</span>
+    <span class="tier-tab" data-tier="五档及以下">五档及以下（51个 · 回暖64.7% · 倒挂13.7%）</span>
+  </div>
+  <div class="filter-bar">
+    <input id="spec-search" type="search" placeholder="搜索品规">
+    <select id="brand-filter">
+      <option value="全部">全部品牌</option>
+      <option value="中华">中华系列</option>
+      <option value="省产烟">省产烟</option>
+      <option value="其他">其他</option>
+    </select>
+    <label><input type="checkbox" id="only-inverted"> 只看倒挂</label>
+    <label><input type="checkbox" id="only-new-inversion"> 只看新增倒挂</label>
+    <label><input type="checkbox" id="only-decliner"> 只看连续下跌</label>
+  </div>
+  <div class="data-table-container">
+    <table class="tier-table" id="tier-table">
+      <thead><tr><th>品规</th><th>均价(元)</th><th>环比(%)</th><th>溢价率(%)</th><th>倒挂面(%)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2 style="cursor:pointer;" onclick="document.getElementById('detail-table-wrap').classList.toggle('hidden')">
+    📋 完整数据明细表 ▼
+  </h2>
+  <div id="detail-table-wrap" class="hidden">
+    <div class="data-table-container">
+      <table class="data-table"><thead><tr>
+<th>序号</th><th>档位</th><th>规格</th><th>批发价</th><th>5月20日均价</th><th>5月27日均价</th><th>环比变化</th><th>溢价</th><th>溢价率</th><th>倒挂面</th></tr></thead><tbody><tr><td>1</td><td>一档</td><td style="text-align:left;">白沙(硬细支和天下)</td><td>721</td><td>703.8</td><td>708.8</td><td style="color:#e74c3c;">0.71%</td><td style="color:#e74c3c;">-12</td><td style="color:#e74c3c;">-1.67%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>2</td><td>一档</td><td style="text-align:left;">中华(金中支)</td><td>678</td><td>680.0</td><td>691.2</td><td style="color:#e74c3c;">1.65%</td><td style="">13</td><td style="">1.89%</td><td style="">0.00%</td></tr>
+<tr><td>3</td><td>一档</td><td style="text-align:left;">白沙(和天下)</td><td>848</td><td>810.0</td><td>815.0</td><td style="color:#e74c3c;">0.62%</td><td style="color:#e74c3c;">-33</td><td style="color:#e74c3c;">-3.89%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>4</td><td>一档</td><td style="text-align:left;">黄金叶(天叶)</td><td>678</td><td>698.8</td><td>701.9</td><td style="color:#e74c3c;">0.45%</td><td style="">23</td><td style="">3.46%</td><td style="">0.00%</td></tr>
+<tr><td>5</td><td>一档</td><td style="text-align:left;">黄鹤楼(硬平安)</td><td>721</td><td>671.2</td><td>681.0</td><td style="color:#e74c3c;">1.45%</td><td style="color:#e74c3c;">-40</td><td style="color:#e74c3c;">-5.52%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>6</td><td>一档</td><td style="text-align:left;">七匹狼(金砖中支)</td><td>763</td><td>695.0</td><td>722.5</td><td style="color:#e74c3c;">3.96%</td><td style="color:#e74c3c;">-41</td><td style="color:#e74c3c;">-5.33%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>7</td><td>一档</td><td style="text-align:left;">利群(休闲细支)</td><td>848</td><td>835.0</td><td>836.0</td><td style="color:#e74c3c;">0.12%</td><td style="color:#e74c3c;">-12</td><td style="color:#e74c3c;">-1.42%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>8</td><td>一档</td><td style="text-align:left;">黄金叶(天叶细支)</td><td>848</td><td>782.5</td><td>785.0</td><td style="color:#e74c3c;">0.32%</td><td style="color:#e74c3c;">-63</td><td style="color:#e74c3c;">-7.43%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>9</td><td>一档</td><td style="text-align:left;">黄鹤楼(软1916)</td><td>848</td><td>787.5</td><td>792.5</td><td style="color:#e74c3c;">0.63%</td><td style="color:#e74c3c;">-56</td><td style="color:#e74c3c;">-6.54%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>10</td><td>一档</td><td style="text-align:left;">黄鹤楼(硬15细支)</td><td>848</td><td>862.5</td><td>861.2</td><td style="color:#27ae60;">-0.14%</td><td style="">13</td><td style="">1.56%</td><td style="">0.00%</td></tr>
+<tr><td>11</td><td>一档</td><td style="text-align:left;">南京(细支九五)</td><td>678</td><td>656.2</td><td>660.0</td><td style="color:#e74c3c;">0.57%</td><td style="color:#e74c3c;">-18</td><td style="color:#e74c3c;">-2.71%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>12</td><td>一档</td><td style="text-align:left;">南京(软九五)</td><td>721</td><td>698.8</td><td>700.6</td><td style="color:#e74c3c;">0.27%</td><td style="color:#e74c3c;">-20</td><td style="color:#e74c3c;">-2.80%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>13</td><td>一档</td><td style="text-align:left;">云烟(细支大重九)</td><td>848</td><td>805.0</td><td>805.0</td><td style="">0.00%</td><td style="color:#e74c3c;">-43</td><td style="color:#e74c3c;">-5.07%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>14</td><td>一档</td><td style="text-align:left;">七匹狼(大通仙)</td><td>721</td><td>677.5</td><td>677.5</td><td style="">0.00%</td><td style="color:#e74c3c;">-43</td><td style="color:#e74c3c;">-6.01%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>15</td><td>一档</td><td style="text-align:left;">玉溪(细支翡翠)</td><td>678</td><td>632.5</td><td>631.2</td><td style="color:#27ae60;">-0.20%</td><td style="color:#e74c3c;">-47</td><td style="color:#e74c3c;">-6.95%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>16</td><td>一档</td><td style="text-align:left;">熊猫(硬经典)</td><td>848</td><td>817.5</td><td>825.0</td><td style="color:#e74c3c;">0.92%</td><td style="color:#e74c3c;">-23</td><td style="color:#e74c3c;">-2.71%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>17</td><td>一档</td><td style="text-align:left;">云烟(软大重九)</td><td>721</td><td>682.5</td><td>680.0</td><td style="color:#27ae60;">-0.37%</td><td style="color:#e74c3c;">-41</td><td style="color:#e74c3c;">-5.66%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>18</td><td>一档</td><td style="text-align:left;">黄金叶(软天叶)</td><td>763</td><td>851.2</td><td>852.5</td><td style="color:#e74c3c;">0.15%</td><td style="">89</td><td style="">11.70%</td><td style="">0.00%</td></tr>
+<tr><td>19</td><td>一档</td><td style="text-align:left;">白沙(硬和天下双中支)</td><td>763</td><td>757.5</td><td>757.5</td><td style="">0.00%</td><td style="color:#e74c3c;">-6</td><td style="color:#e74c3c;">-0.75%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>20</td><td>一档</td><td style="text-align:left;">七匹狼(古田成功细支)</td><td>678</td><td>615.0</td><td>626.2</td><td style="color:#e74c3c;">1.83%</td><td style="color:#e74c3c;">-52</td><td style="color:#e74c3c;">-7.69%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>21</td><td>一档</td><td style="text-align:left;">南京(九五新版)</td><td>678</td><td>657.5</td><td>662.5</td><td style="color:#e74c3c;">0.76%</td><td style="color:#e74c3c;">-16</td><td style="color:#e74c3c;">-2.34%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>22</td><td>一档</td><td style="text-align:left;">白沙(和天下尊品中支)</td><td>1000</td><td>1117.5</td><td>1120.0</td><td style="color:#e74c3c;">0.22%</td><td style="">120</td><td style="">12.00%</td><td style="">0.00%</td></tr>
+<tr><td>23</td><td>一档</td><td style="text-align:left;">利群(休闲银细支)</td><td>678</td><td>1220.0</td><td>1212.5</td><td style="color:#27ae60;">-0.61%</td><td style="">534</td><td style="">78.73%</td><td style="">0.00%</td></tr>
+<tr><td>24</td><td>一档</td><td style="text-align:left;">白沙(和天下尊品细支)</td><td>848</td><td>1095.0</td><td>1107.5</td><td style="color:#e74c3c;">1.14%</td><td style="">260</td><td style="">30.60%</td><td style="">0.00%</td></tr>
+<tr><td>25</td><td>一档</td><td style="text-align:left;">南京(细支九五3mg)</td><td>1000</td><td>1062.5</td><td>1060.0</td><td style="color:#27ae60;">-0.24%</td><td style="">60</td><td style="">6.00%</td><td style="">0.00%</td></tr>
+<tr><td>26</td><td>一档</td><td style="text-align:left;">熊猫(典藏中支)</td><td>1000</td><td>1255.0</td><td>1303.8</td><td style="color:#e74c3c;">3.88%</td><td style="">304</td><td style="">30.38%</td><td style="">0.00%</td></tr>
+<tr><td>27</td><td>一档</td><td style="text-align:left;">黄金叶(天叶细支3mg)</td><td>848</td><td>1217.5</td><td>1216.2</td><td style="color:#27ae60;">-0.10%</td><td style="">368</td><td style="">43.43%</td><td style="">0.00%</td></tr>
+<tr><td>28</td><td>一档</td><td style="text-align:left;">中华(细支3mg)</td><td>848</td><td>1350.0</td><td>1312.5</td><td style="color:#27ae60;">-2.78%</td><td style="">464</td><td style="">54.78%</td><td style="">0.00%</td></tr>
+<tr><td>29</td><td>一档</td><td style="text-align:left;">黄鹤楼(1916小蜜蜂)</td><td>678</td><td>672.5</td><td>676.2</td><td style="color:#e74c3c;">0.56%</td><td style="color:#e74c3c;">-2</td><td style="color:#e74c3c;">-0.32%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>30</td><td>一档</td><td style="text-align:left;">芙蓉王(锦绣世纪3mg)</td><td>678</td><td>1217.5</td><td>1217.5</td><td style="">0.00%</td><td style="">539</td><td style="">79.47%</td><td style="">0.00%</td></tr>
+<tr><td>31</td><td>一档</td><td style="text-align:left;">娇子(国宝之恋细支)</td><td>678</td><td>685.0</td><td>683.8</td><td style="color:#27ae60;">-0.18%</td><td style="">5</td><td style="">0.79%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>32</td><td>一档</td><td style="text-align:left;">熊猫(经典细支)</td><td>848</td><td>1012.5</td><td>1012.5</td><td style="">0.00%</td><td style="">164</td><td style="">19.40%</td><td style="">0.00%</td></tr>
+<tr><td>33</td><td>一档</td><td style="text-align:left;">黄鹤楼(1916宝相细支)</td><td>848</td><td>2487.5</td><td>2575.0</td><td style="color:#e74c3c;">3.52%</td><td style="">1727</td><td style="">203.66%</td><td style="">0.00%</td></tr>
+<tr><td>34</td><td>一档</td><td style="text-align:left;">云烟(大重九细支久仰)</td><td>678</td><td>1117.5</td><td>1096.2</td><td style="color:#27ae60;">-1.90%</td><td style="">418</td><td style="">61.59%</td><td style="">0.00%</td></tr>
+<tr><td>35</td><td>二档</td><td style="text-align:left;">中华(双中支)</td><td>424</td><td>442.5</td><td>448.3</td><td style="color:#e74c3c;">1.32%</td><td style="">24</td><td style="">5.74%</td><td style="">0.00%</td></tr>
+<tr><td>36</td><td>二档</td><td style="text-align:left;">七匹狼(古田金中支)</td><td>424</td><td>380.0</td><td>389.0</td><td style="color:#e74c3c;">2.37%</td><td style="color:#e74c3c;">-35</td><td style="color:#e74c3c;">-8.25%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>37</td><td>二档</td><td style="text-align:left;">七匹狼(金砖时代)</td><td>424</td><td>392.5</td><td>400.0</td><td style="color:#e74c3c;">1.91%</td><td style="color:#e74c3c;">-24</td><td style="color:#e74c3c;">-5.66%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>38</td><td>二档</td><td style="text-align:left;">南京(雨花石)</td><td>456</td><td>432.5</td><td>440.0</td><td style="color:#e74c3c;">1.73%</td><td style="color:#e74c3c;">-16</td><td style="color:#e74c3c;">-3.47%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>39</td><td>二档</td><td style="text-align:left;">中华(细支)</td><td>424</td><td>425.8</td><td>430.6</td><td style="color:#e74c3c;">1.14%</td><td style="">7</td><td style="">1.55%</td><td style="">0.00%</td></tr>
+<tr><td>40</td><td>二档</td><td style="text-align:left;">中华(软)(3)</td><td>583</td><td>543.8</td><td>557.5</td><td style="color:#e74c3c;">2.53%</td><td style="color:#e74c3c;">-26</td><td style="color:#e74c3c;">-4.37%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>41</td><td>二档</td><td style="text-align:left;">中华(软)(1)</td><td>583</td><td>520.0</td><td>525.0</td><td style="color:#e74c3c;">0.96%</td><td style="color:#e74c3c;">-58</td><td style="color:#e74c3c;">-9.95%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>42</td><td>二档</td><td style="text-align:left;">黄金叶(天香细支)</td><td>456</td><td>426.2</td><td>430.6</td><td style="color:#e74c3c;">1.03%</td><td style="color:#e74c3c;">-25</td><td style="color:#e74c3c;">-5.52%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>43</td><td>二档</td><td style="text-align:left;">七匹狼(金砖细支)</td><td>583</td><td>526.2</td><td>531.9</td><td style="color:#e74c3c;">1.07%</td><td style="color:#e74c3c;">-51</td><td style="color:#e74c3c;">-8.77%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>44</td><td>二档</td><td style="text-align:left;">冬虫夏草(和润)</td><td>424</td><td>380.0</td><td>386.2</td><td style="color:#e74c3c;">1.64%</td><td style="color:#e74c3c;">-38</td><td style="color:#e74c3c;">-8.90%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>45</td><td>二档</td><td style="text-align:left;">利群(阳光尊细支)</td><td>424</td><td>380.0</td><td>376.2</td><td style="color:#27ae60;">-0.99%</td><td style="color:#e74c3c;">-48</td><td style="color:#e74c3c;">-11.26%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>46</td><td>二档</td><td style="text-align:left;">黄鹤楼(视界)</td><td>466</td><td>435.0</td><td>437.5</td><td style="color:#e74c3c;">0.57%</td><td style="color:#e74c3c;">-29</td><td style="color:#e74c3c;">-6.20%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>47</td><td>二档</td><td style="text-align:left;">云烟(黑金刚印象)</td><td>466</td><td>442.5</td><td>445.0</td><td style="color:#e74c3c;">0.56%</td><td style="color:#e74c3c;">-21</td><td style="color:#e74c3c;">-4.59%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>48</td><td>二档</td><td style="text-align:left;">云烟(中支小重九)</td><td>424</td><td>407.5</td><td>405.0</td><td style="color:#27ae60;">-0.61%</td><td style="color:#e74c3c;">-19</td><td style="color:#e74c3c;">-4.48%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>49</td><td>二档</td><td style="text-align:left;">芙蓉王(锦绣细支)</td><td>424</td><td>415.0</td><td>418.8</td><td style="color:#e74c3c;">0.90%</td><td style="color:#e74c3c;">-5</td><td style="color:#e74c3c;">-1.24%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>50</td><td>二档</td><td style="text-align:left;">黄鹤楼(3mg)</td><td>424</td><td>492.5</td><td>495.0</td><td style="color:#e74c3c;">0.51%</td><td style="">71</td><td style="">16.75%</td><td style="">0.00%</td></tr>
+<tr><td>51</td><td>二档</td><td style="text-align:left;">南京(雨花石3mg)</td><td>551</td><td>561.2</td><td>556.9</td><td style="color:#27ae60;">-0.78%</td><td style="">6</td><td style="">1.03%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>52</td><td>二档</td><td style="text-align:left;">泰山(茉莉香韵)</td><td>424</td><td>402.5</td><td>402.5</td><td style="">0.00%</td><td style="color:#e74c3c;">-22</td><td style="color:#e74c3c;">-5.07%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>53</td><td>二档</td><td style="text-align:left;">黄山(经典皖烟细支)</td><td>424</td><td>385.0</td><td>385.0</td><td style="">0.00%</td><td style="color:#e74c3c;">-39</td><td style="color:#e74c3c;">-9.20%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>54</td><td>二档</td><td style="text-align:left;">中华(细支6mg)</td><td>510</td><td>507.5</td><td>507.5</td><td style="">0.00%</td><td style="color:#e74c3c;">-2</td><td style="color:#e74c3c;">-0.49%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>55</td><td>二档</td><td style="text-align:left;">利群(阳光中支)</td><td>424</td><td>415.0</td><td>423.8</td><td style="color:#e74c3c;">2.11%</td><td style="color:#e74c3c;">-0</td><td style="color:#e74c3c;">-0.06%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>56</td><td>二档</td><td style="text-align:left;">中华(金双支)</td><td>510</td><td>515.0</td><td>517.5</td><td style="color:#e74c3c;">0.49%</td><td style="">8</td><td style="">1.47%</td><td style="">25.00%</td></tr>
+<tr><td>57</td><td>二档</td><td style="text-align:left;">七匹狼(古田纯青细支)</td><td>424</td><td>450.0</td><td>448.8</td><td style="color:#27ae60;">-0.28%</td><td style="">25</td><td style="">5.84%</td><td style="">0.00%</td></tr>
+<tr><td>58</td><td>二档</td><td style="text-align:left;">黄山(徽商3mg)</td><td>424</td><td>462.5</td><td>467.5</td><td style="color:#e74c3c;">1.08%</td><td style="">44</td><td style="">10.26%</td><td style="">0.00%</td></tr>
+<tr><td>59</td><td>三档</td><td style="text-align:left;">中华(硬)</td><td>382</td><td>344.2</td><td>349.9</td><td style="color:#e74c3c;">1.65%</td><td style="color:#e74c3c;">-32</td><td style="color:#e74c3c;">-8.30%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>60</td><td>三档</td><td style="text-align:left;">七匹狼(古田金细支)</td><td>263</td><td>246.2</td><td>253.8</td><td style="color:#e74c3c;">3.05%</td><td style="color:#e74c3c;">-9</td><td style="color:#e74c3c;">-3.52%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>61</td><td>三档</td><td style="text-align:left;">七匹狼(古田红军灰)</td><td>263</td><td>230.0</td><td>235.4</td><td style="color:#e74c3c;">2.36%</td><td style="color:#e74c3c;">-28</td><td style="color:#e74c3c;">-10.49%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>62</td><td>三档</td><td style="text-align:left;">钻石(荷花)</td><td>276</td><td>305.0</td><td>312.5</td><td style="color:#e74c3c;">2.46%</td><td style="">37</td><td style="">13.39%</td><td style="">0.00%</td></tr>
+<tr><td>63</td><td>三档</td><td style="text-align:left;">利群(西子阳光)</td><td>276</td><td>264.2</td><td>265.6</td><td style="color:#e74c3c;">0.52%</td><td style="color:#e74c3c;">-10</td><td style="color:#e74c3c;">-3.62%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>64</td><td>三档</td><td style="text-align:left;">利群(软长嘴)</td><td>318</td><td>300.8</td><td>303.2</td><td style="color:#e74c3c;">0.83%</td><td style="color:#e74c3c;">-15</td><td style="color:#e74c3c;">-4.64%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>65</td><td>三档</td><td style="text-align:left;">芙蓉王(硬中支)</td><td>263</td><td>244.5</td><td>248.2</td><td style="color:#e74c3c;">1.53%</td><td style="color:#e74c3c;">-15</td><td style="color:#e74c3c;">-5.61%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>66</td><td>三档</td><td style="text-align:left;">钻石(细支荷花)</td><td>360</td><td>363.8</td><td>366.2</td><td style="color:#e74c3c;">0.69%</td><td style="">6</td><td style="">1.62%</td><td style="">0.00%</td></tr>
+<tr><td>67</td><td>三档</td><td style="text-align:left;">七匹狼(尚品)</td><td>276</td><td>265.0</td><td>266.9</td><td style="color:#e74c3c;">0.71%</td><td style="color:#e74c3c;">-9</td><td style="color:#e74c3c;">-3.17%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>68</td><td>三档</td><td style="text-align:left;">黄鹤楼(硬峡谷情细支)</td><td>263</td><td>251.8</td><td>255.6</td><td style="color:#e74c3c;">1.54%</td><td style="color:#e74c3c;">-7</td><td style="color:#e74c3c;">-2.80%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>69</td><td>三档</td><td style="text-align:left;">黄鹤楼(硬峡谷柔情)</td><td>263</td><td>265.8</td><td>267.5</td><td style="color:#e74c3c;">0.66%</td><td style="">4</td><td style="">1.71%</td><td style="">0.00%</td></tr>
+<tr><td>70</td><td>三档</td><td style="text-align:left;">七匹狼(星辰大海双中支)</td><td>339</td><td>320.0</td><td>324.4</td><td style="color:#e74c3c;">1.37%</td><td style="color:#e74c3c;">-15</td><td style="color:#e74c3c;">-4.37%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>71</td><td>三档</td><td style="text-align:left;">兰州(黑中支)</td><td>263</td><td>267.5</td><td>270.0</td><td style="color:#e74c3c;">0.93%</td><td style="">7</td><td style="">2.66%</td><td style="">0.00%</td></tr>
+<tr><td>72</td><td>三档</td><td style="text-align:left;">黄金叶(大成细支)</td><td>263</td><td>250.2</td><td>255.1</td><td style="color:#e74c3c;">1.95%</td><td style="color:#e74c3c;">-8</td><td style="color:#e74c3c;">-2.99%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>73</td><td>三档</td><td style="text-align:left;">利群(阳光青中支)</td><td>263</td><td>257.5</td><td>261.9</td><td style="color:#e74c3c;">1.70%</td><td style="color:#e74c3c;">-1</td><td style="color:#e74c3c;">-0.43%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>74</td><td>三档</td><td style="text-align:left;">黄山(徽商新概念细支)</td><td>339</td><td>327.5</td><td>330.0</td><td style="color:#e74c3c;">0.76%</td><td style="color:#e74c3c;">-9</td><td style="color:#e74c3c;">-2.71%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>75</td><td>三档</td><td style="text-align:left;">冬虫夏草(双中支)</td><td>339</td><td>323.8</td><td>323.1</td><td style="color:#27ae60;">-0.19%</td><td style="color:#e74c3c;">-16</td><td style="color:#e74c3c;">-4.74%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>76</td><td>三档</td><td style="text-align:left;">中华(全开式)</td><td>382</td><td>358.8</td><td>361.2</td><td style="color:#e74c3c;">0.70%</td><td style="color:#e74c3c;">-20</td><td style="color:#e74c3c;">-5.33%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>77</td><td>三档</td><td style="text-align:left;">南京(大观园爆冰)</td><td>263</td><td>258.2</td><td>260.0</td><td style="color:#e74c3c;">0.68%</td><td style="color:#e74c3c;">-3</td><td style="color:#e74c3c;">-1.14%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>78</td><td>三档</td><td style="text-align:left;">芙蓉王(沁爽细支)</td><td>263</td><td>273.8</td><td>271.9</td><td style="color:#27ae60;">-0.68%</td><td style="">9</td><td style="">3.37%</td><td style="">0.00%</td></tr>
+<tr><td>79</td><td>三档</td><td style="text-align:left;">天子(千里江山细支)</td><td>263</td><td>247.5</td><td>247.5</td><td style="">0.00%</td><td style="color:#e74c3c;">-16</td><td style="color:#e74c3c;">-5.89%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>80</td><td>三档</td><td style="text-align:left;">云烟(流金印象细支)</td><td>382</td><td>355.0</td><td>355.0</td><td style="">0.00%</td><td style="color:#e74c3c;">-27</td><td style="color:#e74c3c;">-6.97%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>81</td><td>三档</td><td style="text-align:left;">玉溪(细支)</td><td>263</td><td>246.2</td><td>246.9</td><td style="color:#e74c3c;">0.25%</td><td style="color:#e74c3c;">-16</td><td style="color:#e74c3c;">-6.13%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>82</td><td>三档</td><td style="text-align:left;">娇子(宽窄好运)</td><td>263</td><td>228.8</td><td>231.9</td><td style="color:#e74c3c;">1.37%</td><td style="color:#e74c3c;">-31</td><td style="color:#e74c3c;">-11.83%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>83</td><td>三档</td><td style="text-align:left;">黄鹤楼(视窗)</td><td>300</td><td>327.5</td><td>329.4</td><td style="color:#e74c3c;">0.57%</td><td style="">29</td><td style="">9.79%</td><td style="">0.00%</td></tr>
+<tr><td>84</td><td>三档</td><td style="text-align:left;">泰山(儒风细支)</td><td>263</td><td>251.2</td><td>253.8</td><td style="color:#e74c3c;">1.00%</td><td style="color:#e74c3c;">-9</td><td style="color:#e74c3c;">-3.52%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>85</td><td>三档</td><td style="text-align:left;">长白山(人参参缘)</td><td>263</td><td>258.0</td><td>260.0</td><td style="color:#e74c3c;">0.78%</td><td style="color:#e74c3c;">-3</td><td style="color:#e74c3c;">-1.14%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>86</td><td>三档</td><td style="text-align:left;">七匹狼(星辰大海细支)</td><td>339</td><td>355.0</td><td>361.2</td><td style="color:#e74c3c;">1.76%</td><td style="">22</td><td style="">6.50%</td><td style="">0.00%</td></tr>
+<tr><td>87</td><td>三档</td><td style="text-align:left;">七匹狼(观海中支)</td><td>263</td><td>257.5</td><td>263.1</td><td style="color:#e74c3c;">2.18%</td><td style="">0</td><td style="">0.05%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>88</td><td>三档</td><td style="text-align:left;">芙蓉王(绽放)</td><td>300</td><td>307.5</td><td>310.0</td><td style="color:#e74c3c;">0.81%</td><td style="">10</td><td style="">3.33%</td><td style="">0.00%</td></tr>
+<tr><td>89</td><td>三档</td><td style="text-align:left;">紫气东来(祥瑞)</td><td>276</td><td>207.5</td><td>212.5</td><td style="color:#e74c3c;">2.41%</td><td style="color:#e74c3c;">-63</td><td style="color:#e74c3c;">-22.90%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>90</td><td>三档</td><td style="text-align:left;">娇子(宽窄锦上细支)</td><td>263</td><td>266.2</td><td>270.0</td><td style="color:#e74c3c;">1.41%</td><td style="">7</td><td style="">2.66%</td><td style="">0.00%</td></tr>
+<tr><td>91</td><td>三档</td><td style="text-align:left;">金圣(乐神)</td><td>263</td><td>268.8</td><td>273.1</td><td style="color:#e74c3c;">1.63%</td><td style="">10</td><td style="">3.85%</td><td style="">0.00%</td></tr>
+<tr><td>92</td><td>三档</td><td style="text-align:left;">牡丹(蓝彩细支)</td><td>263</td><td>275.0</td><td>280.0</td><td style="color:#e74c3c;">1.82%</td><td style="">17</td><td style="">6.46%</td><td style="">0.00%</td></tr>
+<tr><td>93</td><td>三档</td><td style="text-align:left;">利群(阳光细支)</td><td>339</td><td>342.5</td><td>351.2</td><td style="color:#e74c3c;">2.55%</td><td style="">12</td><td style="">3.55%</td><td style="">0.00%</td></tr>
+<tr><td>94</td><td>三档</td><td style="text-align:left;">古田(光芒)</td><td>263</td><td>260.0</td><td>263.8</td><td style="color:#e74c3c;">1.44%</td><td style="">1</td><td style="">0.29%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>95</td><td>三档</td><td style="text-align:left;">芙蓉王(绽放细支)</td><td>339</td><td>335.0</td><td>337.5</td><td style="color:#e74c3c;">0.75%</td><td style="color:#e74c3c;">-2</td><td style="color:#e74c3c;">-0.50%</td><td style="">25.00%</td></tr>
+<tr><td>96</td><td>三档</td><td style="text-align:left;">南京(十二钗钰钗)</td><td>300</td><td>307.5</td><td>310.6</td><td style="color:#e74c3c;">1.02%</td><td style="">11</td><td style="">3.54%</td><td style="">0.00%</td></tr>
+<tr><td>97</td><td>三档</td><td style="text-align:left;">云烟(神秘花园)</td><td>276</td><td>285.0</td><td>290.0</td><td style="color:#e74c3c;">1.75%</td><td style="">14</td><td style="">5.22%</td><td style="">0.00%</td></tr>
+<tr><td>98</td><td>三档</td><td style="text-align:left;">双喜(春天白月光)</td><td>263</td><td>281.2</td><td>281.9</td><td style="color:#e74c3c;">0.22%</td><td style="">19</td><td style="">7.18%</td><td style="">0.00%</td></tr>
+<tr><td>99</td><td>三档</td><td style="text-align:left;">好猫(长安印象)</td><td>263</td><td>245.0</td><td>250.0</td><td style="color:#e74c3c;">2.04%</td><td style="color:#e74c3c;">-13</td><td style="color:#e74c3c;">-4.94%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>100</td><td>三档</td><td style="text-align:left;">七匹狼(小金砖细支)</td><td>263</td><td>373.8</td><td>372.5</td><td style="color:#27ae60;">-0.33%</td><td style="">110</td><td style="">41.63%</td><td style="">0.00%</td></tr>
+<tr><td>101</td><td>四档</td><td style="text-align:left;">七匹狼(软灰)</td><td>186</td><td>181.8</td><td>183.3</td><td style="color:#e74c3c;">0.87%</td><td style="color:#e74c3c;">-2</td><td style="color:#e74c3c;">-1.17%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>102</td><td>四档</td><td style="text-align:left;">七匹狼(锋芒)</td><td>158</td><td>157.0</td><td>158.9</td><td style="color:#e74c3c;">1.22%</td><td style="">1</td><td style="">0.58%</td><td style="">25.00%</td></tr>
+<tr><td>103</td><td>四档</td><td style="text-align:left;">七匹狼(纯尚)</td><td>186</td><td>181.0</td><td>182.0</td><td style="color:#e74c3c;">0.55%</td><td style="color:#e74c3c;">-4</td><td style="color:#e74c3c;">-1.89%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>104</td><td>四档</td><td style="text-align:left;">玉溪(软)</td><td>201</td><td>191.2</td><td>191.7</td><td style="color:#e74c3c;">0.22%</td><td style="color:#e74c3c;">-10</td><td style="color:#e74c3c;">-4.83%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>105</td><td>四档</td><td style="text-align:left;">七匹狼(银中支)</td><td>201</td><td>198.8</td><td>200.5</td><td style="color:#e74c3c;">0.88%</td><td style="color:#e74c3c;">-1</td><td style="color:#e74c3c;">-0.45%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>106</td><td>四档</td><td style="text-align:left;">利群(长嘴)</td><td>191</td><td>190.5</td><td>190.9</td><td style="color:#e74c3c;">0.22%</td><td style="">0</td><td style="">0.06%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>107</td><td>四档</td><td style="text-align:left;">利群(软蓝)</td><td>159</td><td>160.8</td><td>162.3</td><td style="color:#e74c3c;">0.98%</td><td style="">3</td><td style="">2.10%</td><td style="">0.00%</td></tr>
+<tr><td>108</td><td>四档</td><td style="text-align:left;">七匹狼(乘风启航)</td><td>225</td><td>212.5</td><td>212.5</td><td style="">0.00%</td><td style="color:#e74c3c;">-12</td><td style="color:#e74c3c;">-5.56%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>109</td><td>四档</td><td style="text-align:left;">芙蓉王(硬)</td><td>218</td><td>203.8</td><td>205.0</td><td style="color:#e74c3c;">0.61%</td><td style="color:#e74c3c;">-13</td><td style="color:#e74c3c;">-6.12%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>110</td><td>四档</td><td style="text-align:left;">七匹狼(鼓浪扬帆)</td><td>201</td><td>183.8</td><td>188.1</td><td style="color:#e74c3c;">2.38%</td><td style="color:#e74c3c;">-13</td><td style="color:#e74c3c;">-6.59%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>111</td><td>四档</td><td style="text-align:left;">南京(十二钗烤烟)</td><td>244</td><td>238.8</td><td>241.9</td><td style="color:#e74c3c;">1.31%</td><td style="color:#e74c3c;">-2</td><td style="color:#e74c3c;">-0.79%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>112</td><td>四档</td><td style="text-align:left;">贵烟(跨越)</td><td>201</td><td>207.0</td><td>210.8</td><td style="color:#e74c3c;">1.81%</td><td style="">9</td><td style="">4.64%</td><td style="">0.00%</td></tr>
+<tr><td>113</td><td>四档</td><td style="text-align:left;">黄金叶(商鼎)</td><td>175</td><td>170.0</td><td>173.8</td><td style="color:#e74c3c;">2.21%</td><td style="color:#e74c3c;">-1</td><td style="color:#e74c3c;">-0.71%</td><td style="">25.00%</td></tr>
+<tr><td>114</td><td>四档</td><td style="text-align:left;">云烟(小熊猫家园)</td><td>158</td><td>154.8</td><td>157.4</td><td style="color:#e74c3c;">1.70%</td><td style="color:#e74c3c;">-1</td><td style="color:#e74c3c;">-0.40%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>115</td><td>四档</td><td style="text-align:left;">芙蓉王(硬细支)</td><td>225</td><td>212.5</td><td>215.6</td><td style="color:#e74c3c;">1.47%</td><td style="color:#e74c3c;">-9</td><td style="color:#e74c3c;">-4.17%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>116</td><td>四档</td><td style="text-align:left;">利群(硬)</td><td>229</td><td>231.2</td><td>231.9</td><td style="color:#e74c3c;">0.27%</td><td style="">3</td><td style="">1.27%</td><td style="">0.00%</td></tr>
+<tr><td>117</td><td>四档</td><td style="text-align:left;">黄鹤楼(软蓝)</td><td>164</td><td>163.8</td><td>163.3</td><td style="color:#27ae60;">-0.25%</td><td style="color:#e74c3c;">-1</td><td style="color:#e74c3c;">-0.59%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>118</td><td>四档</td><td style="text-align:left;">七匹狼(厦门)</td><td>229</td><td>217.5</td><td>221.2</td><td style="color:#e74c3c;">1.72%</td><td style="color:#e74c3c;">-8</td><td style="color:#e74c3c;">-3.37%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>119</td><td>四档</td><td style="text-align:left;">真龙(美人香草)</td><td>167</td><td>168.8</td><td>169.8</td><td style="color:#e74c3c;">0.64%</td><td style="">2</td><td style="">1.41%</td><td style="">0.00%</td></tr>
+<tr><td>120</td><td>四档</td><td style="text-align:left;">七匹狼(银细支)</td><td>225</td><td>213.8</td><td>215.8</td><td style="color:#e74c3c;">0.97%</td><td style="color:#e74c3c;">-9</td><td style="color:#e74c3c;">-4.07%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>121</td><td>四档</td><td style="text-align:left;">金桥(冰爆)</td><td>175</td><td>155.0</td><td>159.4</td><td style="color:#e74c3c;">2.82%</td><td style="color:#e74c3c;">-16</td><td style="color:#e74c3c;">-8.93%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>122</td><td>四档</td><td style="text-align:left;">云烟(软珍品)</td><td>207</td><td>195.0</td><td>197.5</td><td style="color:#e74c3c;">1.28%</td><td style="color:#e74c3c;">-9</td><td style="color:#e74c3c;">-4.45%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>123</td><td>四档</td><td style="text-align:left;">长白山(蓝尚)</td><td>158</td><td>165.0</td><td>165.4</td><td style="color:#e74c3c;">0.25%</td><td style="">7</td><td style="">4.69%</td><td style="">0.00%</td></tr>
+<tr><td>124</td><td>四档</td><td style="text-align:left;">泰山(颜悦)</td><td>167</td><td>166.0</td><td>165.8</td><td style="color:#27ae60;">-0.10%</td><td style="color:#e74c3c;">-2</td><td style="color:#e74c3c;">-0.98%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>125</td><td>四档</td><td style="text-align:left;">泰山(望岳)</td><td>167</td><td>160.0</td><td>161.5</td><td style="color:#e74c3c;">0.94%</td><td style="color:#e74c3c;">-6</td><td style="color:#e74c3c;">-3.57%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>126</td><td>四档</td><td style="text-align:left;">牡丹(红中支)</td><td>175</td><td>211.2</td><td>216.2</td><td style="color:#e74c3c;">2.37%</td><td style="">41</td><td style="">23.57%</td><td style="">0.00%</td></tr>
+<tr><td>127</td><td>四档</td><td style="text-align:left;">娇子(宽窄好运细支)</td><td>225</td><td>206.2</td><td>205.0</td><td style="color:#27ae60;">-0.61%</td><td style="color:#e74c3c;">-20</td><td style="color:#e74c3c;">-8.89%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>128</td><td>四档</td><td style="text-align:left;">苏烟(五星红杉树)</td><td>189</td><td>190.0</td><td>191.9</td><td style="color:#e74c3c;">0.99%</td><td style="">3</td><td style="">1.69%</td><td style="">0.00%</td></tr>
+<tr><td>129</td><td>四档</td><td style="text-align:left;">天子(中支)</td><td>201</td><td>201.2</td><td>205.0</td><td style="color:#e74c3c;">1.86%</td><td style="">4</td><td style="">1.79%</td><td style="">0.00%</td></tr>
+<tr><td>130</td><td>四档</td><td style="text-align:left;">利群(江南韵)</td><td>225</td><td>236.2</td><td>240.6</td><td style="color:#e74c3c;">1.85%</td><td style="">16</td><td style="">6.94%</td><td style="">0.00%</td></tr>
+<tr><td>131</td><td>四档</td><td style="text-align:left;">娇子(宽窄醇香中支)</td><td>202</td><td>191.2</td><td>195.0</td><td style="color:#e74c3c;">1.96%</td><td style="color:#e74c3c;">-8</td><td style="color:#e74c3c;">-3.70%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>132</td><td>四档</td><td style="text-align:left;">中南海(冰耀中支)</td><td>201</td><td>215.0</td><td>220.0</td><td style="color:#e74c3c;">2.33%</td><td style="">19</td><td style="">9.24%</td><td style="">0.00%</td></tr>
+<tr><td>133</td><td>四档</td><td style="text-align:left;">黄鹤楼(硬奇景)</td><td>238</td><td>232.5</td><td>232.5</td><td style="">0.00%</td><td style="color:#e74c3c;">-6</td><td style="color:#e74c3c;">-2.52%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>134</td><td>四档</td><td style="text-align:left;">黄山(红方印细支)</td><td>175</td><td>168.8</td><td>170.0</td><td style="color:#e74c3c;">0.74%</td><td style="color:#e74c3c;">-5</td><td style="color:#e74c3c;">-2.86%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>135</td><td>四档</td><td style="text-align:left;">黄山(小红方印)</td><td>186</td><td>177.5</td><td>180.0</td><td style="color:#e74c3c;">1.41%</td><td style="color:#e74c3c;">-6</td><td style="color:#e74c3c;">-2.96%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>136</td><td>四档</td><td style="text-align:left;">大前门(短支)</td><td>158</td><td>168.8</td><td>170.0</td><td style="color:#e74c3c;">0.74%</td><td style="">12</td><td style="">7.59%</td><td style="">0.00%</td></tr>
+<tr><td>137</td><td>四档</td><td style="text-align:left;">双喜(硬祥云好日子)</td><td>186</td><td>168.0</td><td>166.9</td><td style="color:#27ae60;">-0.67%</td><td style="color:#e74c3c;">-19</td><td style="color:#e74c3c;">-10.04%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>138</td><td>四档</td><td style="text-align:left;">好猫(长乐九美)</td><td>175</td><td>144.2</td><td>147.0</td><td style="color:#e74c3c;">1.91%</td><td style="color:#e74c3c;">-28</td><td style="color:#e74c3c;">-16.00%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>139</td><td>四档</td><td style="text-align:left;">金圣(青瓷)</td><td>158</td><td>135.0</td><td>131.9</td><td style="color:#27ae60;">-2.31%</td><td style="color:#e74c3c;">-26</td><td style="color:#e74c3c;">-16.53%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>140</td><td>四档</td><td style="text-align:left;">双喜(硬晶彩好日子)</td><td>158</td><td>143.0</td><td>140.0</td><td style="color:#27ae60;">-2.10%</td><td style="color:#e74c3c;">-18</td><td style="color:#e74c3c;">-11.39%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>141</td><td>四档</td><td style="text-align:left;">真龙(起源)</td><td>212</td><td>210.5</td><td>213.4</td><td style="color:#e74c3c;">1.37%</td><td style="">1</td><td style="">0.65%</td><td style="">0.00%</td></tr>
+<tr><td>142</td><td>四档</td><td style="text-align:left;">泰山(合悦)</td><td>225</td><td>179.5</td><td>169.2</td><td style="color:#27ae60;">-5.71%</td><td style="color:#e74c3c;">-56</td><td style="color:#e74c3c;">-24.78%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>143</td><td>四档</td><td style="text-align:left;">玉溪(鑫中支)</td><td>225</td><td>210.0</td><td>213.1</td><td style="color:#e74c3c;">1.49%</td><td style="color:#e74c3c;">-12</td><td style="color:#e74c3c;">-5.28%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>144</td><td>四档</td><td style="text-align:left;">黄山(黑马细支)</td><td>225</td><td>213.8</td><td>217.5</td><td style="color:#e74c3c;">1.75%</td><td style="color:#e74c3c;">-8</td><td style="color:#e74c3c;">-3.33%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>145</td><td>四档</td><td style="text-align:left;">人民大会堂(盛京中支)</td><td>175</td><td>156.2</td><td>155.0</td><td style="color:#27ae60;">-0.80%</td><td style="color:#e74c3c;">-20</td><td style="color:#e74c3c;">-11.43%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>146</td><td>四档</td><td style="text-align:left;">三沙(细支)</td><td>225</td><td>189.5</td><td>189.5</td><td style="">0.00%</td><td style="color:#e74c3c;">-36</td><td style="color:#e74c3c;">-15.78%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>147</td><td>四档</td><td style="text-align:left;">金桥(炫影细支)</td><td>225</td><td>187.5</td><td>200.0</td><td style="color:#e74c3c;">6.67%</td><td style="color:#e74c3c;">-25</td><td style="color:#e74c3c;">-11.11%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>148</td><td>四档</td><td style="text-align:left;">双喜(春天·咖路里)</td><td>225</td><td>208.8</td><td>210.0</td><td style="color:#e74c3c;">0.60%</td><td style="color:#e74c3c;">-15</td><td style="color:#e74c3c;">-6.67%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>149</td><td>四档</td><td style="text-align:left;">牡丹(恒大硬中支)</td><td>201</td><td>197.5</td><td>200.0</td><td style="color:#e74c3c;">1.27%</td><td style="color:#e74c3c;">-1</td><td style="color:#e74c3c;">-0.70%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>150</td><td>四档</td><td style="text-align:left;">天子(C位)</td><td>201</td><td>192.5</td><td>200.0</td><td style="color:#e74c3c;">3.90%</td><td style="color:#e74c3c;">-1</td><td style="color:#e74c3c;">-0.70%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>151</td><td>四档</td><td style="text-align:left;">金圣(滕王阁细支)</td><td>175</td><td>170.0</td><td>170.0</td><td style="">0.00%</td><td style="color:#e74c3c;">-5</td><td style="color:#e74c3c;">-2.86%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>152</td><td>四档</td><td style="text-align:left;">龙烟(老巴夺传琦)</td><td>225</td><td>202.5</td><td>210.0</td><td style="color:#e74c3c;">3.70%</td><td style="color:#e74c3c;">-15</td><td style="color:#e74c3c;">-6.67%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>153</td><td>四档</td><td style="text-align:left;">哈尔滨(老巴夺红中支)</td><td>175</td><td>173.8</td><td>175.0</td><td style="color:#e74c3c;">0.72%</td><td style="">0</td><td style="">0.00%</td><td style="">0.00%</td></tr>
+<tr><td>154</td><td>四档</td><td style="text-align:left;">玉溪(细支缤果爆)</td><td>225</td><td>276.2</td><td>279.4</td><td style="color:#e74c3c;">1.13%</td><td style="">54</td><td style="">24.17%</td><td style="">0.00%</td></tr>
+<tr><td>155</td><td>四档</td><td style="text-align:left;">双喜(勿忘我)</td><td>175</td><td>163.8</td><td>165.0</td><td style="color:#e74c3c;">0.76%</td><td style="color:#e74c3c;">-10</td><td style="color:#e74c3c;">-5.71%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>156</td><td>四档</td><td style="text-align:left;">芙蓉王(品悦细支)</td><td>225</td><td>232.5</td><td>235.0</td><td style="color:#e74c3c;">1.08%</td><td style="">10</td><td style="">4.44%</td><td style="">0.00%</td></tr>
+<tr><td>157</td><td>四档</td><td style="text-align:left;">白沙(开心就好)</td><td>175</td><td>171.2</td><td>173.8</td><td style="color:#e74c3c;">1.46%</td><td style="color:#e74c3c;">-1</td><td style="color:#e74c3c;">-0.71%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>158</td><td>四档</td><td style="text-align:left;">黄鹤楼(冰咖)</td><td>225</td><td>321.2</td><td>318.8</td><td style="color:#27ae60;">-0.78%</td><td style="">94</td><td style="">41.67%</td><td style="">0.00%</td></tr>
+<tr><td>159</td><td>四档</td><td style="text-align:left;">双喜(好日子城市之光)</td><td>201</td><td>211.2</td><td>213.8</td><td style="color:#e74c3c;">1.18%</td><td style="">12</td><td style="">6.13%</td><td style="">0.00%</td></tr>
+<tr><td>160</td><td>五档</td><td style="text-align:left;">七匹狼(软红)</td><td>143</td><td>147.0</td><td>147.9</td><td style="color:#e74c3c;">0.62%</td><td style="">5</td><td style="">3.37%</td><td style="">0.00%</td></tr>
+<tr><td>161</td><td>五档</td><td style="text-align:left;">七匹狼(红)</td><td>132</td><td>134.0</td><td>135.8</td><td style="color:#e74c3c;">1.37%</td><td style="">3</td><td style="">2.52%</td><td style="">25.00%</td></tr>
+<tr><td>162</td><td>五档</td><td style="text-align:left;">七匹狼(纯境)</td><td>143</td><td>169.0</td><td>169.7</td><td style="color:#e74c3c;">0.39%</td><td style="">27</td><td style="">18.57%</td><td style="">0.00%</td></tr>
+<tr><td>163</td><td>五档</td><td style="text-align:left;">七匹狼(纯雅)</td><td>143</td><td>139.2</td><td>140.7</td><td style="color:#e74c3c;">1.02%</td><td style="color:#e74c3c;">-2</td><td style="color:#e74c3c;">-1.70%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>164</td><td>五档</td><td style="text-align:left;">七匹狼(蓝钻)</td><td>114</td><td>115.0</td><td>115.8</td><td style="color:#e74c3c;">0.65%</td><td style="">1</td><td style="">1.09%</td><td style="">0.00%</td></tr>
+<tr><td>165</td><td>五档</td><td style="text-align:left;">利群(新版)</td><td>143</td><td>167.5</td><td>166.9</td><td style="color:#27ae60;">-0.35%</td><td style="">24</td><td style="">16.64%</td><td style="">0.00%</td></tr>
+<tr><td>166</td><td>五档</td><td style="text-align:left;">牡丹(软)</td><td>122</td><td>143.0</td><td>142.6</td><td style="color:#27ae60;">-0.29%</td><td style="">21</td><td style="">16.97%</td><td style="">0.00%</td></tr>
+<tr><td>167</td><td>五档</td><td style="text-align:left;">云烟(紫)</td><td>114</td><td>114.8</td><td>115.2</td><td style="color:#e74c3c;">0.36%</td><td style="">1</td><td style="">0.58%</td><td style="">0.00%</td></tr>
+<tr><td>168</td><td>五档</td><td style="text-align:left;">云烟(细支云龙)</td><td>129</td><td>132.5</td><td>134.2</td><td style="color:#e74c3c;">1.32%</td><td style="">5</td><td style="">3.83%</td><td style="">0.00%</td></tr>
+<tr><td>169</td><td>五档</td><td style="text-align:left;">泰山(心悦)</td><td>140</td><td>145.8</td><td>145.3</td><td style="color:#27ae60;">-0.29%</td><td style="">5</td><td style="">3.87%</td><td style="">0.00%</td></tr>
+<tr><td>170</td><td>五档</td><td style="text-align:left;">南京(炫赫门)</td><td>155</td><td>177.5</td><td>179.6</td><td style="color:#e74c3c;">1.17%</td><td style="">25</td><td style="">15.86%</td><td style="">0.00%</td></tr>
+<tr><td>171</td><td>五档</td><td style="text-align:left;">黄鹤楼(硬银紫)</td><td>114</td><td>138.5</td><td>140.6</td><td style="color:#e74c3c;">1.50%</td><td style="">26</td><td style="">22.78%</td><td style="">0.00%</td></tr>
+<tr><td>172</td><td>五档</td><td style="text-align:left;">好猫(细支长乐)</td><td>140</td><td>146.2</td><td>146.7</td><td style="color:#e74c3c;">0.28%</td><td style="">7</td><td style="">4.82%</td><td style="">0.00%</td></tr>
+<tr><td>173</td><td>五档</td><td style="text-align:left;">双喜(硬经典1906)</td><td>151</td><td>152.8</td><td>152.6</td><td style="color:#27ae60;">-0.11%</td><td style="">2</td><td style="">1.37%</td><td style="">0.00%</td></tr>
+<tr><td>174</td><td>五档</td><td style="text-align:left;">黄鹤楼(天下名楼)</td><td>140</td><td>150.0</td><td>152.9</td><td style="color:#e74c3c;">1.94%</td><td style="">13</td><td style="">9.29%</td><td style="">0.00%</td></tr>
+<tr><td>175</td><td>五档</td><td style="text-align:left;">黄山(新制皖烟)</td><td>122</td><td>134.5</td><td>134.4</td><td style="color:#27ae60;">-0.06%</td><td style="">13</td><td style="">10.27%</td><td style="">0.00%</td></tr>
+<tr><td>176</td><td>五档</td><td style="text-align:left;">金圣(滕王阁·紫光)</td><td>129</td><td>131.5</td><td>131.8</td><td style="color:#e74c3c;">0.19%</td><td style="">2</td><td style="">1.89%</td><td style="">0.00%</td></tr>
+<tr><td>177</td><td>五档</td><td style="text-align:left;">中南海(5mg细支)</td><td>122</td><td>116.2</td><td>113.8</td><td style="color:#27ae60;">-2.15%</td><td style="color:#e74c3c;">-8</td><td style="color:#e74c3c;">-6.69%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>178</td><td>五档</td><td style="text-align:left;">双喜(硬金五叶神)</td><td>122</td><td>123.8</td><td>124.2</td><td style="color:#e74c3c;">0.40%</td><td style="">2</td><td style="">1.93%</td><td style="">0.00%</td></tr>
+<tr><td>179</td><td>五档</td><td style="text-align:left;">钻石(软绿)</td><td>122</td><td>124.2</td><td>124.8</td><td style="color:#e74c3c;">0.40%</td><td style="">3</td><td style="">2.34%</td><td style="">0.00%</td></tr>
+<tr><td>180</td><td>五档</td><td style="text-align:left;">长白山(777)</td><td>122</td><td>139.5</td><td>140.0</td><td style="color:#e74c3c;">0.36%</td><td style="">18</td><td style="">14.85%</td><td style="">0.00%</td></tr>
+<tr><td>181</td><td>五档</td><td style="text-align:left;">白沙(硬精品三代)</td><td>129</td><td>128.8</td><td>129.6</td><td style="color:#e74c3c;">0.65%</td><td style="">0</td><td style="">0.22%</td><td style="">25.00%</td></tr>
+<tr><td>182</td><td>五档</td><td style="text-align:left;">黄金叶(乐途)</td><td>122</td><td>132.5</td><td>135.0</td><td style="color:#e74c3c;">1.89%</td><td style="">13</td><td style="">10.75%</td><td style="">0.00%</td></tr>
+<tr><td>183</td><td>五档</td><td style="text-align:left;">娇子(格调细支)</td><td>129</td><td>136.8</td><td>138.3</td><td style="color:#e74c3c;">1.16%</td><td style="">9</td><td style="">6.99%</td><td style="">0.00%</td></tr>
+<tr><td>184</td><td>五档</td><td style="text-align:left;">白沙(昭君)</td><td>129</td><td>118.8</td><td>119.6</td><td style="color:#e74c3c;">0.70%</td><td style="color:#e74c3c;">-10</td><td style="color:#e74c3c;">-7.51%</td><td style="color:#e74c3c;font-weight:600;">100.00%</td></tr>
+<tr><td>185</td><td>五档</td><td style="text-align:left;">兰州(硬珍品)</td><td>155</td><td>163.2</td><td>165.0</td><td style="color:#e74c3c;">1.07%</td><td style="">10</td><td style="">6.45%</td><td style="">0.00%</td></tr>
+<tr><td>186</td><td>五档</td><td style="text-align:left;">软盒牡丹3</td><td>122</td><td>182.5</td><td>182.9</td><td style="color:#e74c3c;">0.23%</td><td style="">61</td><td style="">50.05%</td><td style="">0.00%</td></tr>
+<tr><td>187</td><td>六档</td><td style="text-align:left;">七匹狼(豪迈)</td><td>93</td><td>102.8</td><td>104.0</td><td style="color:#e74c3c;">1.22%</td><td style="">11</td><td style="">11.49%</td><td style="">0.00%</td></tr>
+<tr><td>188</td><td>六档</td><td style="text-align:left;">七匹狼(白)</td><td>80</td><td>95.0</td><td>95.0</td><td style="">0.00%</td><td style="">15</td><td style="">18.75%</td><td style="">0.00%</td></tr>
+<tr><td>189</td><td>六档</td><td style="text-align:left;">红双喜(硬8mg)</td><td>88</td><td>94.2</td><td>94.2</td><td style="">0.00%</td><td style="">6</td><td style="">7.10%</td><td style="">0.00%</td></tr>
+<tr><td>190</td><td>六档</td><td style="text-align:left;">红塔山(软经典)</td><td>80</td><td>92.0</td><td>92.3</td><td style="color:#e74c3c;">0.36%</td><td style="">12</td><td style="">15.42%</td><td style="">0.00%</td></tr>
+<tr><td>191</td><td>六档</td><td style="text-align:left;">红塔山(硬经典100)</td><td>97</td><td>104.5</td><td>105.8</td><td style="color:#e74c3c;">1.20%</td><td style="">9</td><td style="">9.02%</td><td style="">0.00%</td></tr>
+<tr><td>192</td><td>六档</td><td style="text-align:left;">双喜(软经典)</td><td>97</td><td>114.2</td><td>115.4</td><td style="color:#e74c3c;">1.02%</td><td style="">18</td><td style="">18.99%</td><td style="">0.00%</td></tr>
+<tr><td>193</td><td>六档</td><td style="text-align:left;">云烟(软如意)</td><td>93</td><td>96.5</td><td>97.6</td><td style="color:#e74c3c;">1.12%</td><td style="">4</td><td style="">4.61%</td><td style="">0.00%</td></tr>
+<tr><td>194</td><td>六档</td><td style="text-align:left;">泰山(红将军)</td><td>88</td><td>87.0</td><td>86.2</td><td style="color:#27ae60;">-0.96%</td><td style="color:#e74c3c;">-2</td><td style="color:#e74c3c;">-2.08%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>195</td><td>六档</td><td style="text-align:left;">白沙(硬新精品二代)</td><td>97</td><td>106.2</td><td>106.8</td><td style="color:#e74c3c;">0.55%</td><td style="">10</td><td style="">10.14%</td><td style="">0.00%</td></tr>
+<tr><td>196</td><td>六档</td><td style="text-align:left;">黄金叶(金满堂)</td><td>93</td><td>104.8</td><td>105.7</td><td style="color:#e74c3c;">0.88%</td><td style="">12</td><td style="">13.28%</td><td style="">0.00%</td></tr>
+<tr><td>197</td><td>六档</td><td style="text-align:left;">中南海(典8)</td><td>97</td><td>96.0</td><td>95.2</td><td style="color:#27ae60;">-0.87%</td><td style="color:#e74c3c;">-2</td><td style="color:#e74c3c;">-1.89%</td><td style="color:#e74c3c;font-weight:600;">75.00%</td></tr>
+<tr><td>198</td><td>六档</td><td style="text-align:left;">娇子(X)</td><td>97</td><td>97.2</td><td>96.2</td><td style="color:#27ae60;">-1.03%</td><td style="color:#e74c3c;">-1</td><td style="color:#e74c3c;">-0.77%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>199</td><td>六档</td><td style="text-align:left;">金桥(软混)</td><td>88</td><td>84.5</td><td>84.9</td><td style="color:#e74c3c;">0.49%</td><td style="color:#e74c3c;">-3</td><td style="color:#e74c3c;">-3.50%</td><td style="color:#e74c3c;font-weight:600;">50.00%</td></tr>
+<tr><td>200</td><td>六档</td><td style="text-align:left;">金圣(硬滕王阁)</td><td>97</td><td>108.8</td><td>107.8</td><td style="color:#27ae60;">-0.92%</td><td style="">11</td><td style="">11.08%</td><td style="">0.00%</td></tr>
+<tr><td>201</td><td>六档</td><td style="text-align:left;">云烟(福)</td><td>107</td><td>111.0</td><td>112.8</td><td style="color:#e74c3c;">1.58%</td><td style="">6</td><td style="">5.31%</td><td style="">0.00%</td></tr>
+<tr><td>202</td><td>六档</td><td style="text-align:left;">好猫(金猴王)</td><td>71</td><td>73.8</td><td>73.3</td><td style="color:#27ae60;">-0.56%</td><td style="">2</td><td style="">3.29%</td><td style="">25.00%</td></tr>
+<tr><td>203</td><td>六档</td><td style="text-align:left;">七匹狼(蓝)</td><td>71</td><td>92.0</td><td>93.1</td><td style="color:#e74c3c;">1.18%</td><td style="">22</td><td style="">31.10%</td><td style="">0.00%</td></tr>
+<tr><td>204</td><td>六档</td><td style="text-align:left;">红塔山(硬经典)</td><td>75</td><td>87.5</td><td>89.2</td><td style="color:#e74c3c;">1.90%</td><td style="">14</td><td style="">18.89%</td><td style="">0.00%</td></tr>
+<tr><td>205</td><td>七档</td><td style="text-align:left;">泰山(硬红八喜)</td><td>57</td><td>66.2</td><td>68.3</td><td style="color:#e74c3c;">3.14%</td><td style="">11</td><td style="">19.38%</td><td style="">0.00%</td></tr>
+<tr><td>206</td><td>七档</td><td style="text-align:left;">黄果树(长征)</td><td>62</td><td>76.2</td><td>75.0</td><td style="color:#27ae60;">-1.64%</td><td style="">14</td><td style="">21.95%</td><td style="">0.00%</td></tr>
+<tr><td>207</td><td>七档</td><td style="text-align:left;">黄山(新一品)</td><td>62</td><td>75.0</td><td>73.3</td><td style="color:#27ae60;">-2.22%</td><td style="">12</td><td style="">19.24%</td><td style="">0.00%</td></tr>
+<tr><td>208</td><td>七档</td><td style="text-align:left;">金圣(硬红·十二生肖)</td><td>62</td><td>75.0</td><td>73.8</td><td style="color:#27ae60;">-1.67%</td><td style="">12</td><td style="">19.92%</td><td style="">0.00%</td></tr>
+<tr><td>209</td><td>七档</td><td style="text-align:left;">娇子(蓝时代)</td><td>62</td><td>68.8</td><td>67.5</td><td style="color:#27ae60;">-1.82%</td><td style="">6</td><td style="">9.76%</td><td style="">0.00%</td></tr>
+<tr><td>210</td><td>八档</td><td style="text-align:left;">红旗渠(新版银河)</td><td>44</td><td>69.5</td><td>65.8</td><td style="color:#27ae60;">-5.40%</td><td style="">21</td><td style="">47.75%</td><td style="">0.00%</td></tr>
+</tbody></table></div></div></div>
+
+<div class="footer">厦门流通价格监测报告 · 5月27日 · 由自动化脚本生成</div>
+</div>
+
+<style>.hidden { display:none !important; }</style>
+
+<script>
+// ── Tier Tabs ──
+(function() {
+  var tierData = {"一档": {"total": 34, "recovery_pct": 58.82, "daogua_pct": 52.94, "avg_change": 0.51, "specs": [{"spec": "白沙(硬细支和天下)", "tier": "一档", "price": 708.8, "change": 0.71, "premium": -1.67, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "中华(金中支)", "tier": "一档", "price": 691.2, "change": 1.65, "premium": 1.89, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "中华"}, {"spec": "白沙(和天下)", "tier": "一档", "price": 815.0, "change": 0.62, "premium": -3.89, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄金叶(天叶)", "tier": "一档", "price": 701.9, "change": 0.45, "premium": 3.46, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(硬平安)", "tier": "一档", "price": 681.0, "change": 1.45, "premium": -5.52, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(金砖中支)", "tier": "一档", "price": 722.5, "change": 3.96, "premium": -5.33, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "利群(休闲细支)", "tier": "一档", "price": 836.0, "change": 0.12, "premium": -1.42, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄金叶(天叶细支)", "tier": "一档", "price": 785.0, "change": 0.32, "premium": -7.43, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(软1916)", "tier": "一档", "price": 792.5, "change": 0.63, "premium": -6.54, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(硬15细支)", "tier": "一档", "price": 861.2, "change": -0.14, "premium": 1.56, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "南京(细支九五)", "tier": "一档", "price": 660.0, "change": 0.57, "premium": -2.71, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "南京(软九五)", "tier": "一档", "price": 700.6, "change": 0.27, "premium": -2.8, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(细支大重九)", "tier": "一档", "price": 805.0, "change": 0.0, "premium": -5.07, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(大通仙)", "tier": "一档", "price": 677.5, "change": 0.0, "premium": -6.01, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "省产烟"}, {"spec": "玉溪(细支翡翠)", "tier": "一档", "price": 631.2, "change": -0.2, "premium": -6.95, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": true, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "熊猫(硬经典)", "tier": "一档", "price": 825.0, "change": 0.92, "premium": -2.71, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(软大重九)", "tier": "一档", "price": 680.0, "change": -0.37, "premium": -5.66, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "黄金叶(软天叶)", "tier": "一档", "price": 852.5, "change": 0.15, "premium": 11.7, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "白沙(硬和天下双中支)", "tier": "一档", "price": 757.5, "change": 0.0, "premium": -0.75, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(古田成功细支)", "tier": "一档", "price": 626.2, "change": 1.83, "premium": -7.69, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "南京(九五新版)", "tier": "一档", "price": 662.5, "change": 0.76, "premium": -2.34, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "白沙(和天下尊品中支)", "tier": "一档", "price": 1120.0, "change": 0.22, "premium": 12.0, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "利群(休闲银细支)", "tier": "一档", "price": 1212.5, "change": -0.61, "premium": 78.73, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "白沙(和天下尊品细支)", "tier": "一档", "price": 1107.5, "change": 1.14, "premium": 30.6, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "南京(细支九五3mg)", "tier": "一档", "price": 1060.0, "change": -0.24, "premium": 6.0, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "熊猫(典藏中支)", "tier": "一档", "price": 1303.8, "change": 3.88, "premium": 30.38, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄金叶(天叶细支3mg)", "tier": "一档", "price": 1216.2, "change": -0.1, "premium": 43.43, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "中华(细支3mg)", "tier": "一档", "price": 1312.5, "change": -2.78, "premium": 54.78, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "中华"}, {"spec": "黄鹤楼(1916小蜜蜂)", "tier": "一档", "price": 676.2, "change": 0.56, "premium": -0.32, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "芙蓉王(锦绣世纪3mg)", "tier": "一档", "price": 1217.5, "change": 0.0, "premium": 79.47, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "娇子(国宝之恋细支)", "tier": "一档", "price": 683.8, "change": -0.18, "premium": 0.79, "inversion": 50.0, "isInverted": false, "isNewInversion": false, "isDecliner": true, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "熊猫(经典细支)", "tier": "一档", "price": 1012.5, "change": 0.0, "premium": 19.4, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(1916宝相细支)", "tier": "一档", "price": 2575.0, "change": 3.52, "premium": 203.66, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(大重九细支久仰)", "tier": "一档", "price": 1096.2, "change": -1.9, "premium": 61.59, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": true, "isUp": false, "isDown": true, "brand": "其他"}]}, "二档": {"total": 24, "recovery_pct": 70.83, "daogua_pct": 70.83, "avg_change": 0.8, "specs": [{"spec": "中华(双中支)", "tier": "二档", "price": 448.3, "change": 1.32, "premium": 5.74, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "中华"}, {"spec": "七匹狼(古田金中支)", "tier": "二档", "price": 389.0, "change": 2.37, "premium": -8.25, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(金砖时代)", "tier": "二档", "price": 400.0, "change": 1.91, "premium": -5.66, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "南京(雨花石)", "tier": "二档", "price": 440.0, "change": 1.73, "premium": -3.47, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "中华(细支)", "tier": "二档", "price": 430.6, "change": 1.14, "premium": 1.55, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "中华"}, {"spec": "中华(软)(3)", "tier": "二档", "price": 557.5, "change": 2.53, "premium": -4.37, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "中华"}, {"spec": "中华(软)(1)", "tier": "二档", "price": 525.0, "change": 0.96, "premium": -9.95, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "中华"}, {"spec": "黄金叶(天香细支)", "tier": "二档", "price": 430.6, "change": 1.03, "premium": -5.52, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(金砖细支)", "tier": "二档", "price": 531.9, "change": 1.07, "premium": -8.77, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "冬虫夏草(和润)", "tier": "二档", "price": 386.2, "change": 1.64, "premium": -8.9, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "利群(阳光尊细支)", "tier": "二档", "price": 376.2, "change": -0.99, "premium": -11.26, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "黄鹤楼(视界)", "tier": "二档", "price": 437.5, "change": 0.57, "premium": -6.2, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(黑金刚印象)", "tier": "二档", "price": 445.0, "change": 0.56, "premium": -4.59, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(中支小重九)", "tier": "二档", "price": 405.0, "change": -0.61, "premium": -4.48, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "芙蓉王(锦绣细支)", "tier": "二档", "price": 418.8, "change": 0.9, "premium": -1.24, "inversion": 50.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(3mg)", "tier": "二档", "price": 495.0, "change": 0.51, "premium": 16.75, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "南京(雨花石3mg)", "tier": "二档", "price": 556.9, "change": -0.78, "premium": 1.03, "inversion": 50.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "泰山(茉莉香韵)", "tier": "二档", "price": 402.5, "change": 0.0, "premium": -5.07, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "黄山(经典皖烟细支)", "tier": "二档", "price": 385.0, "change": 0.0, "premium": -9.2, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "中华(细支6mg)", "tier": "二档", "price": 507.5, "change": 0.0, "premium": -0.49, "inversion": 50.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "中华"}, {"spec": "利群(阳光中支)", "tier": "二档", "price": 423.8, "change": 2.11, "premium": -0.06, "inversion": 50.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "中华(金双支)", "tier": "二档", "price": 517.5, "change": 0.49, "premium": 1.47, "inversion": 25.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "中华"}, {"spec": "七匹狼(古田纯青细支)", "tier": "二档", "price": 448.8, "change": -0.28, "premium": 5.84, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": true, "isUp": false, "isDown": true, "brand": "省产烟"}, {"spec": "黄山(徽商3mg)", "tier": "二档", "price": 467.5, "change": 1.08, "premium": 10.26, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}]}, "三档": {"total": 42, "recovery_pct": 88.1, "daogua_pct": 57.14, "avg_change": 1.16, "specs": [{"spec": "中华(硬)", "tier": "三档", "price": 349.9, "change": 1.65, "premium": -8.3, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "中华"}, {"spec": "七匹狼(古田金细支)", "tier": "三档", "price": 253.8, "change": 3.05, "premium": -3.52, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(古田红军灰)", "tier": "三档", "price": 235.4, "change": 2.36, "premium": -10.49, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "钻石(荷花)", "tier": "三档", "price": 312.5, "change": 2.46, "premium": 13.39, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "利群(西子阳光)", "tier": "三档", "price": 265.6, "change": 0.52, "premium": -3.62, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "利群(软长嘴)", "tier": "三档", "price": 303.2, "change": 0.83, "premium": -4.64, "inversion": 50.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "芙蓉王(硬中支)", "tier": "三档", "price": 248.2, "change": 1.53, "premium": -5.61, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "钻石(细支荷花)", "tier": "三档", "price": 366.2, "change": 0.69, "premium": 1.62, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(尚品)", "tier": "三档", "price": 266.9, "change": 0.71, "premium": -3.17, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "黄鹤楼(硬峡谷情细支)", "tier": "三档", "price": 255.6, "change": 1.54, "premium": -2.8, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(硬峡谷柔情)", "tier": "三档", "price": 267.5, "change": 0.66, "premium": 1.71, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(星辰大海双中支)", "tier": "三档", "price": 324.4, "change": 1.37, "premium": -4.37, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "兰州(黑中支)", "tier": "三档", "price": 270.0, "change": 0.93, "premium": 2.66, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄金叶(大成细支)", "tier": "三档", "price": 255.1, "change": 1.95, "premium": -2.99, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "利群(阳光青中支)", "tier": "三档", "price": 261.9, "change": 1.7, "premium": -0.43, "inversion": 50.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄山(徽商新概念细支)", "tier": "三档", "price": 330.0, "change": 0.76, "premium": -2.71, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "冬虫夏草(双中支)", "tier": "三档", "price": 323.1, "change": -0.19, "premium": -4.74, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "中华(全开式)", "tier": "三档", "price": 361.2, "change": 0.7, "premium": -5.33, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "中华"}, {"spec": "南京(大观园爆冰)", "tier": "三档", "price": 260.0, "change": 0.68, "premium": -1.14, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "芙蓉王(沁爽细支)", "tier": "三档", "price": 271.9, "change": -0.68, "premium": 3.37, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "天子(千里江山细支)", "tier": "三档", "price": 247.5, "change": 0.0, "premium": -5.89, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "云烟(流金印象细支)", "tier": "三档", "price": 355.0, "change": 0.0, "premium": -6.97, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "玉溪(细支)", "tier": "三档", "price": 246.9, "change": 0.25, "premium": -6.13, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "娇子(宽窄好运)", "tier": "三档", "price": 231.9, "change": 1.37, "premium": -11.83, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(视窗)", "tier": "三档", "price": 329.4, "change": 0.57, "premium": 9.79, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "泰山(儒风细支)", "tier": "三档", "price": 253.8, "change": 1.0, "premium": -3.52, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "长白山(人参参缘)", "tier": "三档", "price": 260.0, "change": 0.78, "premium": -1.14, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(星辰大海细支)", "tier": "三档", "price": 361.2, "change": 1.76, "premium": 6.5, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(观海中支)", "tier": "三档", "price": 263.1, "change": 2.18, "premium": 0.05, "inversion": 50.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "芙蓉王(绽放)", "tier": "三档", "price": 310.0, "change": 0.81, "premium": 3.33, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "紫气东来(祥瑞)", "tier": "三档", "price": 212.5, "change": 2.41, "premium": -22.9, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "娇子(宽窄锦上细支)", "tier": "三档", "price": 270.0, "change": 1.41, "premium": 2.66, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "金圣(乐神)", "tier": "三档", "price": 273.1, "change": 1.63, "premium": 3.85, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "牡丹(蓝彩细支)", "tier": "三档", "price": 280.0, "change": 1.82, "premium": 6.46, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "利群(阳光细支)", "tier": "三档", "price": 351.2, "change": 2.55, "premium": 3.55, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "古田(光芒)", "tier": "三档", "price": 263.8, "change": 1.44, "premium": 0.29, "inversion": 50.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "芙蓉王(绽放细支)", "tier": "三档", "price": 337.5, "change": 0.75, "premium": -0.5, "inversion": 25.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "南京(十二钗钰钗)", "tier": "三档", "price": 310.6, "change": 1.02, "premium": 3.54, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(神秘花园)", "tier": "三档", "price": 290.0, "change": 1.75, "premium": 5.22, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "双喜(春天白月光)", "tier": "三档", "price": 281.9, "change": 0.22, "premium": 7.18, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "好猫(长安印象)", "tier": "三档", "price": 250.0, "change": 2.04, "premium": -4.94, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(小金砖细支)", "tier": "三档", "price": 372.5, "change": -0.33, "premium": 41.63, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "省产烟"}]}, "四档": {"total": 59, "recovery_pct": 77.97, "daogua_pct": 67.8, "avg_change": 0.94, "specs": [{"spec": "七匹狼(软灰)", "tier": "四档", "price": 183.3, "change": 0.87, "premium": -1.17, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(锋芒)", "tier": "四档", "price": 158.9, "change": 1.22, "premium": 0.58, "inversion": 25.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(纯尚)", "tier": "四档", "price": 182.0, "change": 0.55, "premium": -1.89, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "玉溪(软)", "tier": "四档", "price": 191.7, "change": 0.22, "premium": -4.83, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(银中支)", "tier": "四档", "price": 200.5, "change": 0.88, "premium": -0.45, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "利群(长嘴)", "tier": "四档", "price": 190.9, "change": 0.22, "premium": 0.06, "inversion": 50.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "利群(软蓝)", "tier": "四档", "price": 162.3, "change": 0.98, "premium": 2.1, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(乘风启航)", "tier": "四档", "price": 212.5, "change": 0.0, "premium": -5.56, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "省产烟"}, {"spec": "芙蓉王(硬)", "tier": "四档", "price": 205.0, "change": 0.61, "premium": -6.12, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(鼓浪扬帆)", "tier": "四档", "price": 188.1, "change": 2.38, "premium": -6.59, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "南京(十二钗烤烟)", "tier": "四档", "price": 241.9, "change": 1.31, "premium": -0.79, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "贵烟(跨越)", "tier": "四档", "price": 210.8, "change": 1.81, "premium": 4.64, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄金叶(商鼎)", "tier": "四档", "price": 173.8, "change": 2.21, "premium": -0.71, "inversion": 25.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(小熊猫家园)", "tier": "四档", "price": 157.4, "change": 1.7, "premium": -0.4, "inversion": 50.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "芙蓉王(硬细支)", "tier": "四档", "price": 215.6, "change": 1.47, "premium": -4.17, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "利群(硬)", "tier": "四档", "price": 231.9, "change": 0.27, "premium": 1.27, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(软蓝)", "tier": "四档", "price": 163.3, "change": -0.25, "premium": -0.59, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "七匹狼(厦门)", "tier": "四档", "price": 221.2, "change": 1.72, "premium": -3.37, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "真龙(美人香草)", "tier": "四档", "price": 169.8, "change": 0.64, "premium": 1.41, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(银细支)", "tier": "四档", "price": 215.8, "change": 0.97, "premium": -4.07, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "金桥(冰爆)", "tier": "四档", "price": 159.4, "change": 2.82, "premium": -8.93, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(软珍品)", "tier": "四档", "price": 197.5, "change": 1.28, "premium": -4.45, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "长白山(蓝尚)", "tier": "四档", "price": 165.4, "change": 0.25, "premium": 4.69, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "泰山(颜悦)", "tier": "四档", "price": 165.8, "change": -0.1, "premium": -0.98, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "泰山(望岳)", "tier": "四档", "price": 161.5, "change": 0.94, "premium": -3.57, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "牡丹(红中支)", "tier": "四档", "price": 216.2, "change": 2.37, "premium": 23.57, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "娇子(宽窄好运细支)", "tier": "四档", "price": 205.0, "change": -0.61, "premium": -8.89, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "苏烟(五星红杉树)", "tier": "四档", "price": 191.9, "change": 0.99, "premium": 1.69, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "天子(中支)", "tier": "四档", "price": 205.0, "change": 1.86, "premium": 1.79, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "利群(江南韵)", "tier": "四档", "price": 240.6, "change": 1.85, "premium": 6.94, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "娇子(宽窄醇香中支)", "tier": "四档", "price": 195.0, "change": 1.96, "premium": -3.7, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "中南海(冰耀中支)", "tier": "四档", "price": 220.0, "change": 2.33, "premium": 9.24, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(硬奇景)", "tier": "四档", "price": 232.5, "change": 0.0, "premium": -2.52, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "黄山(红方印细支)", "tier": "四档", "price": 170.0, "change": 0.74, "premium": -2.86, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄山(小红方印)", "tier": "四档", "price": 180.0, "change": 1.41, "premium": -2.96, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "大前门(短支)", "tier": "四档", "price": 170.0, "change": 0.74, "premium": 7.59, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "双喜(硬祥云好日子)", "tier": "四档", "price": 166.9, "change": -0.67, "premium": -10.04, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "好猫(长乐九美)", "tier": "四档", "price": 147.0, "change": 1.91, "premium": -16.0, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "金圣(青瓷)", "tier": "四档", "price": 131.9, "change": -2.31, "premium": -16.53, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "双喜(硬晶彩好日子)", "tier": "四档", "price": 140.0, "change": -2.1, "premium": -11.39, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "真龙(起源)", "tier": "四档", "price": 213.4, "change": 1.37, "premium": 0.65, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "泰山(合悦)", "tier": "四档", "price": 169.2, "change": -5.71, "premium": -24.78, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "玉溪(鑫中支)", "tier": "四档", "price": 213.1, "change": 1.49, "premium": -5.28, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄山(黑马细支)", "tier": "四档", "price": 217.5, "change": 1.75, "premium": -3.33, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "人民大会堂(盛京中支)", "tier": "四档", "price": 155.0, "change": -0.8, "premium": -11.43, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "三沙(细支)", "tier": "四档", "price": 189.5, "change": 0.0, "premium": -15.78, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "金桥(炫影细支)", "tier": "四档", "price": 200.0, "change": 6.67, "premium": -11.11, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "双喜(春天·咖路里)", "tier": "四档", "price": 210.0, "change": 0.6, "premium": -6.67, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "牡丹(恒大硬中支)", "tier": "四档", "price": 200.0, "change": 1.27, "premium": -0.7, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "天子(C位)", "tier": "四档", "price": 200.0, "change": 3.9, "premium": -0.7, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "金圣(滕王阁细支)", "tier": "四档", "price": 170.0, "change": 0.0, "premium": -2.86, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "龙烟(老巴夺传琦)", "tier": "四档", "price": 210.0, "change": 3.7, "premium": -6.67, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "哈尔滨(老巴夺红中支)", "tier": "四档", "price": 175.0, "change": 0.72, "premium": 0.0, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "玉溪(细支缤果爆)", "tier": "四档", "price": 279.4, "change": 1.13, "premium": 24.17, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "双喜(勿忘我)", "tier": "四档", "price": 165.0, "change": 0.76, "premium": -5.71, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "芙蓉王(品悦细支)", "tier": "四档", "price": 235.0, "change": 1.08, "premium": 4.44, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "白沙(开心就好)", "tier": "四档", "price": 173.8, "change": 1.46, "premium": -0.71, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(冰咖)", "tier": "四档", "price": 318.8, "change": -0.78, "premium": 41.67, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "双喜(好日子城市之光)", "tier": "四档", "price": 213.8, "change": 1.18, "premium": 6.13, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}]}, "五档及以下": {"total": 51, "recovery_pct": 64.71, "daogua_pct": 13.73, "avg_change": 0.24, "specs": [{"spec": "七匹狼(软红)", "tier": "五档及以下", "price": 147.9, "change": 0.62, "premium": 3.37, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(红)", "tier": "五档及以下", "price": 135.8, "change": 1.37, "premium": 2.52, "inversion": 25.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(纯境)", "tier": "五档及以下", "price": 169.7, "change": 0.39, "premium": 18.57, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(纯雅)", "tier": "五档及以下", "price": 140.7, "change": 1.02, "premium": -1.7, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(蓝钻)", "tier": "五档及以下", "price": 115.8, "change": 0.65, "premium": 1.09, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "利群(新版)", "tier": "五档及以下", "price": 166.9, "change": -0.35, "premium": 16.64, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "牡丹(软)", "tier": "五档及以下", "price": 142.6, "change": -0.29, "premium": 16.97, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "云烟(紫)", "tier": "五档及以下", "price": 115.2, "change": 0.36, "premium": 0.58, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(细支云龙)", "tier": "五档及以下", "price": 134.2, "change": 1.32, "premium": 3.83, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "泰山(心悦)", "tier": "五档及以下", "price": 145.3, "change": -0.29, "premium": 3.87, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "南京(炫赫门)", "tier": "五档及以下", "price": 179.6, "change": 1.17, "premium": 15.86, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄鹤楼(硬银紫)", "tier": "五档及以下", "price": 140.6, "change": 1.5, "premium": 22.78, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "好猫(细支长乐)", "tier": "五档及以下", "price": 146.7, "change": 0.28, "premium": 4.82, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "双喜(硬经典1906)", "tier": "五档及以下", "price": 152.6, "change": -0.11, "premium": 1.37, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "黄鹤楼(天下名楼)", "tier": "五档及以下", "price": 152.9, "change": 1.94, "premium": 9.29, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄山(新制皖烟)", "tier": "五档及以下", "price": 134.4, "change": -0.06, "premium": 10.27, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "金圣(滕王阁·紫光)", "tier": "五档及以下", "price": 131.8, "change": 0.19, "premium": 1.89, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "中南海(5mg细支)", "tier": "五档及以下", "price": 113.8, "change": -2.15, "premium": -6.69, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "双喜(硬金五叶神)", "tier": "五档及以下", "price": 124.2, "change": 0.4, "premium": 1.93, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "钻石(软绿)", "tier": "五档及以下", "price": 124.8, "change": 0.4, "premium": 2.34, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "长白山(777)", "tier": "五档及以下", "price": 140.0, "change": 0.36, "premium": 14.85, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "白沙(硬精品三代)", "tier": "五档及以下", "price": 129.6, "change": 0.65, "premium": 0.22, "inversion": 25.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄金叶(乐途)", "tier": "五档及以下", "price": 135.0, "change": 1.89, "premium": 10.75, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "娇子(格调细支)", "tier": "五档及以下", "price": 138.3, "change": 1.16, "premium": 6.99, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "白沙(昭君)", "tier": "五档及以下", "price": 119.6, "change": 0.7, "premium": -7.51, "inversion": 100.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "兰州(硬珍品)", "tier": "五档及以下", "price": 165.0, "change": 1.07, "premium": 6.45, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "软盒牡丹3", "tier": "五档及以下", "price": 182.9, "change": 0.23, "premium": 50.05, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "七匹狼(豪迈)", "tier": "五档及以下", "price": 104.0, "change": 1.22, "premium": 11.49, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "七匹狼(白)", "tier": "五档及以下", "price": 95.0, "change": 0.0, "premium": 18.75, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "省产烟"}, {"spec": "红双喜(硬8mg)", "tier": "五档及以下", "price": 94.2, "change": 0.0, "premium": 7.1, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": false, "brand": "其他"}, {"spec": "红塔山(软经典)", "tier": "五档及以下", "price": 92.3, "change": 0.36, "premium": 15.42, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "红塔山(硬经典100)", "tier": "五档及以下", "price": 105.8, "change": 1.2, "premium": 9.02, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "双喜(软经典)", "tier": "五档及以下", "price": 115.4, "change": 1.02, "premium": 18.99, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "云烟(软如意)", "tier": "五档及以下", "price": 97.6, "change": 1.12, "premium": 4.61, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "泰山(红将军)", "tier": "五档及以下", "price": 86.2, "change": -0.96, "premium": -2.08, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "白沙(硬新精品二代)", "tier": "五档及以下", "price": 106.8, "change": 0.55, "premium": 10.14, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄金叶(金满堂)", "tier": "五档及以下", "price": 105.7, "change": 0.88, "premium": 13.28, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "中南海(典8)", "tier": "五档及以下", "price": 95.2, "change": -0.87, "premium": -1.89, "inversion": 75.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "娇子(X)", "tier": "五档及以下", "price": 96.2, "change": -1.03, "premium": -0.77, "inversion": 50.0, "isInverted": true, "isNewInversion": true, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "金桥(软混)", "tier": "五档及以下", "price": 84.9, "change": 0.49, "premium": -3.5, "inversion": 50.0, "isInverted": true, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "金圣(硬滕王阁)", "tier": "五档及以下", "price": 107.8, "change": -0.92, "premium": 11.08, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "云烟(福)", "tier": "五档及以下", "price": 112.8, "change": 1.58, "premium": 5.31, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "好猫(金猴王)", "tier": "五档及以下", "price": 73.3, "change": -0.56, "premium": 3.29, "inversion": 25.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "七匹狼(蓝)", "tier": "五档及以下", "price": 93.1, "change": 1.18, "premium": 31.1, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "省产烟"}, {"spec": "红塔山(硬经典)", "tier": "五档及以下", "price": 89.2, "change": 1.9, "premium": 18.89, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "泰山(硬红八喜)", "tier": "五档及以下", "price": 68.3, "change": 3.14, "premium": 19.38, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": true, "isDown": false, "brand": "其他"}, {"spec": "黄果树(长征)", "tier": "五档及以下", "price": 75.0, "change": -1.64, "premium": 21.95, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "黄山(新一品)", "tier": "五档及以下", "price": 73.3, "change": -2.22, "premium": 19.24, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "金圣(硬红·十二生肖)", "tier": "五档及以下", "price": 73.8, "change": -1.67, "premium": 19.92, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "娇子(蓝时代)", "tier": "五档及以下", "price": 67.5, "change": -1.82, "premium": 9.76, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}, {"spec": "红旗渠(新版银河)", "tier": "五档及以下", "price": 65.8, "change": -5.4, "premium": 47.75, "inversion": 0.0, "isInverted": false, "isNewInversion": false, "isDecliner": false, "isUp": false, "isDown": true, "brand": "其他"}]}};
+  var currentTier = '一档';
+  function getFilters() {
+    var q = (document.getElementById('spec-search') || {value:''}).value.trim().toLowerCase();
+    var brand = (document.getElementById('brand-filter') || {value:'全部'}).value;
+    return {
+      q: q,
+      brand: brand,
+      inverted: !!(document.getElementById('only-inverted') || {checked:false}).checked,
+      newInversion: !!(document.getElementById('only-new-inversion') || {checked:false}).checked,
+      decliner: !!(document.getElementById('only-decliner') || {checked:false}).checked
+    };
+  }
+  function matchFilters(s, filters) {
+    if (filters.q && s.spec.toLowerCase().indexOf(filters.q) === -1) return false;
+    if (filters.brand !== '全部' && s.brand !== filters.brand) return false;
+    if (filters.inverted && !s.isInverted) return false;
+    if (filters.newInversion && !s.isNewInversion) return false;
+    if (filters.decliner && !s.isDecliner) return false;
+    return true;
+  }
+  function renderTable(tier) {
+    var d = tierData[tier];
+    if (!d) return;
+    var tbody = document.querySelector('#tier-table tbody');
+    var rows = '';
+    var filters = getFilters();
+    var filtered = d.specs.filter(function(s) { return matchFilters(s, filters); });
+    filtered.forEach(function(s) {
+      var changeStyle = '';
+      if (s.change > 0) changeStyle = 'color:#e74c3c;';
+      else if (s.change < 0) changeStyle = 'color:#27ae60;';
+      var premStyle = s.premium < 0 ? 'color:#e74c3c;' : '';
+      var invStyle = s.inversion >= 50 ? 'color:#e74c3c;font-weight:600;' : '';
+      var badges = '';
+      if (s.isNewInversion) badges += '<span style="margin-left:6px;color:#e74c3c;font-size:11px;">新增倒挂</span>';
+      if (s.isDecliner) badges += '<span style="margin-left:6px;color:#27ae60;font-size:11px;">连续下跌</span>';
+      rows += '<tr><td style="text-align:left;">' + s.spec + badges + '</td>'
+        + '<td>' + (s.price != null ? s.price : '--') + '</td>'
+        + '<td style="' + changeStyle + '">' + (s.change != null ? s.change.toFixed(2)+'%' : '--') + '</td>'
+        + '<td style="' + premStyle + '">' + (s.premium != null ? s.premium.toFixed(2)+'%' : '--') + '</td>'
+        + '<td style="' + invStyle + '">' + (s.inversion != null ? s.inversion.toFixed(2)+'%' : '--') + '</td></tr>';
+    });
+    if (!rows) {
+      rows = '<tr><td colspan="5" style="padding:18px;color:#666;">当前筛选条件下暂无品规</td></tr>';
+    }
+    tbody.innerHTML = rows;
+  }
+  document.querySelectorAll('.tier-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tier-tab').forEach(function(t) { t.classList.remove('active'); });
+      this.classList.add('active');
+      currentTier = this.getAttribute('data-tier');
+      renderTable(currentTier);
+    });
+  });
+  ['spec-search','brand-filter','only-inverted','only-new-inversion','only-decliner'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', function() { renderTable(currentTier); });
+      el.addEventListener('change', function() { renderTable(currentTier); });
+    }
+  });
+  renderTable(currentTier);
+})();
+
+// ── ECharts ──
+(function() {
+  var charts = {};
+  function initChart(id, option) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var c = echarts.init(el);
+    c.setOption(option);
+    charts[id] = c;
+  }
+  window.addEventListener('resize', function() {
+    Object.values(charts).forEach(function(c) { c.resize(); });
+  });
+
+  initChart('chart-recovery', {"title": {"text": "各档位回暖面趋势", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a3a5c"}}, "tooltip": {"trigger": "axis", "formatter": "{b}<br/>{a0}: {c0}%<br/>{a1}: {c1}%<br/>{a2}: {c2}%<br/>{a3}: {c3}%<br/>{a4}: {c4}%"}, "legend": {"bottom": 0, "data": ["一档", "二档", "三档", "四档", "五档及以下"]}, "grid": {"top": 60, "left": 50, "right": 30, "bottom": 40}, "xAxis": {"type": "category", "data": ["4月22日", "4月29日", "5月6日", "5月13日", "5月20日", "5月27日"], "boundaryGap": false}, "yAxis": {"type": "value", "name": "%", "max": 100}, "series": [{"name": "一档", "type": "line", "smooth": true, "data": [17.65, 26.47, 11.76, 20.59, 17.65, 58.82], "lineStyle": {"width": 2}, "itemStyle": {"color": "#5470C6"}, "markLine": {"silent": true, "data": [{"yAxis": 50, "label": {"formatter": "50%"}, "lineStyle": {"color": "#999", "type": "dashed"}}]}}, {"name": "二档", "type": "line", "smooth": true, "data": [12.5, 16.67, 8.33, 16.67, 16.67, 70.83], "lineStyle": {"width": 2}, "itemStyle": {"color": "#91CC75"}, "markLine": {}}, {"name": "三档", "type": "line", "smooth": true, "data": [9.76, 7.14, 23.81, 14.29, 19.05, 88.1], "lineStyle": {"width": 2}, "itemStyle": {"color": "#FAC858"}, "markLine": {}}, {"name": "四档", "type": "line", "smooth": true, "data": [8.62, 1.69, 13.56, 10.17, 27.12, 77.97], "lineStyle": {"width": 2}, "itemStyle": {"color": "#EE6666"}, "markLine": {}}, {"name": "五档及以下", "type": "line", "smooth": true, "data": [3.92, 5.88, 11.76, 13.73, 33.33, 64.71], "lineStyle": {"width": 2}, "itemStyle": {"color": "#73C0DE"}, "markLine": {}}]});
+
+  initChart('chart-inversion', {"title": {"text": "各档位倒挂面趋势", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a3a5c"}}, "tooltip": {"trigger": "axis"}, "legend": {"bottom": 0, "data": ["一档", "二档", "三档", "四档", "五档及以下"]}, "grid": {"top": 60, "left": 50, "right": 30, "bottom": 40}, "xAxis": {"type": "category", "data": ["4月22日", "4月29日", "5月6日", "5月13日", "5月20日", "5月27日"], "boundaryGap": false}, "yAxis": {"type": "value", "name": "%", "max": 100}, "series": [{"name": "一档", "type": "line", "smooth": true, "data": [41.18, 41.18, 41.18, 41.18, 52.94, 52.94], "areaStyle": {"opacity": 0.08}, "lineStyle": {"width": 2}}, {"name": "二档", "type": "line", "smooth": true, "data": [58.33, 58.33, 58.33, 58.33, 70.83, 70.83], "areaStyle": {"opacity": 0.08}, "lineStyle": {"width": 2}}, {"name": "三档", "type": "line", "smooth": true, "data": [53.66, 52.38, 52.38, 52.38, 61.9, 57.14], "areaStyle": {"opacity": 0.08}, "lineStyle": {"width": 2}}, {"name": "四档", "type": "line", "smooth": true, "data": [67.24, 67.8, 69.49, 67.8, 76.27, 67.8], "areaStyle": {"opacity": 0.08}, "lineStyle": {"width": 2}}, {"name": "五档及以下", "type": "line", "smooth": true, "data": [15.69, 15.69, 15.69, 15.69, 13.73, 13.73], "areaStyle": {"opacity": 0.08}, "lineStyle": {"width": 2}}]});
+
+  initChart('chart-overall', {"title": {"text": "全市整体趋势一览", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a3a5c"}}, "tooltip": {"trigger": "axis"}, "legend": {"bottom": 0, "data": ["回暖面", "倒挂面"]}, "grid": {"top": 60, "left": 50, "right": 30, "bottom": 40}, "xAxis": {"type": "category", "data": ["4月22日", "4月29日", "5月6日", "5月13日", "5月20日", "5月27日"]}, "yAxis": {"type": "value", "name": "%", "max": 100}, "series": [{"name": "回暖面", "type": "bar", "data": [9.62, 9.52, 14.29, 14.29, 24.29, 72.86], "itemStyle": {"color": "#5470C6"}, "barMaxWidth": 30}, {"name": "倒挂面", "type": "bar", "data": [46.63, 46.67, 47.14, 46.67, 53.81, 50.48], "itemStyle": {"color": "#EE6666"}, "barMaxWidth": 30}]});
+
+  initChart('chart-brand-zhonghua', {
+    title: {text:'中华系列 各档升/降品规数',left:'center',textStyle:{fontSize:13,color:'#1a3a5c'}},
+    tooltip: {trigger:'axis'},
+    legend: {bottom:0,data:['回升','下滑/持平']},
+    grid: {top:50,left:40,right:20,bottom:40},
+    xAxis: {type:'category',data:["4月22日", "4月29日", "5月6日", "5月13日", "5月20日", "5月27日"]},
+    yAxis: {type:'value',name:'品规数'},
+    series: [{"name": "回升", "type": "bar", "data": [0, 2, 1, 3, 2, 8], "barMaxWidth": 28, "itemStyle": {"color": "#e74c3c"}}, {"name": "下滑/持平", "type": "bar", "data": [10, 8, 9, 7, 8, 2], "barMaxWidth": 28, "itemStyle": {"color": "#27ae60"}}]
+  });
+
+  initChart('chart-brand-shengchan', {
+    title: {text:'省产烟 各档升/降品规数',left:'center',textStyle:{fontSize:13,color:'#1a3a5c'}},
+    tooltip: {trigger:'axis'},
+    legend: {bottom:0,data:['回升','下滑/持平']},
+    grid: {top:50,left:40,right:20,bottom:40},
+    xAxis: {type:'category',data:["4月22日", "4月29日", "5月6日", "5月13日", "5月20日", "5月27日"]},
+    yAxis: {type:'value',name:'品规数'},
+    series: [{"name": "回升", "type": "bar", "data": [4, 2, 4, 3, 8, 26], "barMaxWidth": 28, "itemStyle": {"color": "#e74c3c"}}, {"name": "下滑/持平", "type": "bar", "data": [26, 29, 27, 28, 23, 5], "barMaxWidth": 28, "itemStyle": {"color": "#27ae60"}}]
+  });
+
+})();
+</script>
+</body>
+</html>
